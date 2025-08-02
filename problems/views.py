@@ -67,7 +67,7 @@ def problem_detail(request, problem_id):
         user_submissions = Submission.objects.filter(
             user=request.user,
             problem=problem
-        ).order_by('-created_at')[:10]
+        ).order_by('-submitted_at')[:10]
     
     # Get problem statistics
     stats = {

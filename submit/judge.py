@@ -98,8 +98,7 @@ class CodeJudge:
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True,
-                    timeout=self.timeout
+                    text=True
                 )
                 
                 stdout, stderr = process.communicate(input=input_data, timeout=self.timeout)
@@ -134,14 +133,16 @@ class CodeJudge:
             try:
                 # Compile
                 compile_start = time.time()
+                # Compile
                 compile_process = subprocess.Popen(
                     ['g++', '-o', executable_file, source_file, '-std=c++17', '-O2'],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True,
-                    timeout=10  # 10 seconds for compilation
+                    text=True
+                    # Remove the timeout parameter from here
                 )
                 
+                # The timeout should only be used with communicate()
                 compile_stdout, compile_stderr = compile_process.communicate(timeout=10)
                 
                 if compile_process.returncode != 0:
@@ -154,8 +155,7 @@ class CodeJudge:
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True,
-                    timeout=self.timeout
+                    text=True
                 )
                 
                 stdout, stderr = process.communicate(input=input_data, timeout=self.timeout)
@@ -203,14 +203,16 @@ class CodeJudge:
                     f.write(code)
                 
                 # Compile
+                # Compile
                 compile_process = subprocess.Popen(
                     ['javac', source_file],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True,
-                    timeout=15  # 15 seconds for compilation
+                    text=True
+                    # Remove the timeout parameter from here
                 )
                 
+                # The timeout should only be used with communicate()
                 compile_stdout, compile_stderr = compile_process.communicate(timeout=15)
                 
                 if compile_process.returncode != 0:
@@ -223,8 +225,7 @@ class CodeJudge:
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True,
-                    timeout=self.timeout
+                    text=True
                 )
                 
                 stdout, stderr = process.communicate(input=input_data, timeout=self.timeout)

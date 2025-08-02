@@ -45,3 +45,6 @@ build/
 *.bak
 *.tmp
 *.orig
+
+
+all_code.txt

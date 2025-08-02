@@ -62,7 +62,7 @@ def blog_list(request):
 def blog_detail(request, slug):
     """Display blog post detail"""
     post = get_object_or_404(
-        BlogPost.objects.select_related('author', 'category').prefetch_related('tags', 'comments__author'),
+        BlogPost.objects.select_related('author', 'category').prefetch_related('tags', 'comments__author', 'comments__replies__author'),
         slug=slug,
         status='published'
     )
@@ -110,6 +110,7 @@ def blog_detail(request, slug):
         'user_has_liked': user_has_liked,
         'comment_form': comment_form,
         'reading_time': post.get_reading_time(),
+        'comment_count': post.comments.filter(is_approved=True).count(),
     }
     
     return render(request, 'blogs/blog_detail.html', context)

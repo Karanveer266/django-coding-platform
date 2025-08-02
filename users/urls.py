@@ -14,4 +14,5 @@ urlpatterns = [
     path('profile/<str:username>/', views.profile_view, name='profile_user'),
     path('settings/', views.settings_view, name='settings'),
     path('edit-profile/', views.edit_profile_view, name='edit_profile'),
+    path('statistics/', views.statistics_view, name='statistics'),  # Add this line
 ]

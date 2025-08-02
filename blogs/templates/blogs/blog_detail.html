@@ -293,6 +293,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Replace the toggleReplyForm function at the bottom of the file -->
 <script>
 // Like functionality
 document.addEventListener('DOMContentLoaded', function() {
@@ -347,13 +348,57 @@ function shareOnLinkedIn() {
 
 function copyLink() {
     navigator.clipboard.writeText(window.location.href).then(() => {
-        CodePlatform.showToast('Link copied to clipboard!', 'success');
+        // Create a toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        toast.textContent = 'Link copied to clipboard!';
+        document.body.appendChild(toast);
+        
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
     });
 }
 
-// Reply functionality (placeholder)
+// Reply functionality
 function toggleReplyForm(commentId) {
-    CodePlatform.showToast('Reply functionality coming soon!', 'info');
+    // Check if form already exists
+    const existingForm = document.getElementById(`reply-form-${commentId}`);
+    
+    if (existingForm) {
+        // Toggle visibility
+        existingForm.classList.toggle('hidden');
+        return;
+    }
+    
+    // Get the comment container
+    const commentContainer = document.getElementById(`comment-${commentId}`);
+    const replyContainer = document.createElement('div');
+    replyContainer.id = `reply-form-${commentId}`;
+    replyContainer.className = 'mt-4 ml-14';
+    
+    // Create the reply form
+    replyContainer.innerHTML = `
+        <form method="post" class="space-y-3">
+            {% csrf_token %}
+            <input type="hidden" name="parent_id" value="${commentId}">
+            <textarea name="content" rows="3" 
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Write your reply here..."></textarea>
+            <div class="flex justify-end">
+                <button type="button" onclick="toggleReplyForm(${commentId})" class="mr-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                    <i class="fas fa-reply mr-2"></i>Submit Reply
+                </button>
+            </div>
+        </form>
+    `;
+    
+    // Insert the form after the comment
+    commentContainer.appendChild(replyContainer);
 }
 </script>
 {% endblock %}

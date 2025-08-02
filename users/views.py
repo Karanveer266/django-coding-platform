@@ -363,5 +363,54 @@ def edit_profile_view(request):
             return redirect('users:profile')
         except Exception as e:
             messages.error(request, f'Error updating profile: {str(e)}')
-    
+
     return render(request, 'users/edit_profile.html', {'user': request.user})
+
+@login_required
+def statistics_view(request):
+    """User statistics page"""
+    user = request.user
+    
+    # Get user statistics
+    from submit.models import Submission
+    from problems.models import Problem
+    
+    # Submission stats
+    total_submissions = Submission.objects.filter(user=user).count()
+    accepted_submissions = Submission.objects.filter(user=user, status='ACCEPTED').count()
+    
+    # Problems solved
+    problems_solved = Submission.objects.filter(
+        user=user, 
+        status='ACCEPTED'
+    ).values('problem').distinct().count()
+    
+    # Acceptance rate
+    acceptance_rate = round((accepted_submissions / total_submissions * 100) if total_submissions > 0 else 0, 1)
+    
+    # Difficulty breakdown
+    difficulty_stats = {}
+    solved_problems = Submission.objects.filter(
+        user=user, 
+        status='ACCEPTED'
+    ).values_list('problem_id', flat=True).distinct()
+    
+    difficulty_counts = Problem.objects.filter(
+        id__in=solved_problems
+    ).values('difficulty').annotate(count=Count('id'))
+    
+    for item in difficulty_counts:
+        difficulty_stats[item['difficulty']] = item['count']
+    
+    context = {
+        'user': user,
+        'stats': {
+            'total_submissions': total_submissions,
+            'accepted_submissions': accepted_submissions,
+            'problems_solved': problems_solved,
+            'acceptance_rate': acceptance_rate,
+            'difficulty_stats': difficulty_stats,
+        },
+    }
+    
+    return render(request, 'users/statistics.html', context)
