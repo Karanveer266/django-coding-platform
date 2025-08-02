@@ -44,8 +44,9 @@ class User(AbstractUser):
     current_streak = models.IntegerField(default=0)
     max_streak = models.IntegerField(default=0)
     last_activity_date = models.DateField(null=True, blank=True)
-    contest_rating = models.IntegerField(default=1200)
-    total_contest_time = models.DurationField(null=True, blank=True)
+    # Contest fields - REMOVED
+    # contest_rating = models.IntegerField(null=True, blank=True, help_text="Rating from contests (null if no contests participated)")
+    # total_contest_time = models.DurationField(null=True, blank=True)
     
     # Timestamps
     date_joined = models.DateTimeField(auto_now_add=True)

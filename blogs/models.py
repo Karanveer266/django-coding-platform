@@ -66,7 +66,7 @@ class BlogPost(models.Model):
     meta_keywords = models.CharField(max_length=255, blank=True)
     
     # Analytics
-    view_count = models.PositiveIntegerField(default=0)
+    view_count = models.PositiveIntegerField(default=0)  # Reset to 0 for all posts
     like_count = models.PositiveIntegerField(default=0)
     
     # Timestamps
@@ -93,8 +93,10 @@ class BlogPost(models.Model):
         return reverse('blogs:detail', kwargs={'slug': self.slug})
     
     def increment_view_count(self):
-        self.view_count += 1
-        self.save(update_fields=['view_count'])
+        # Removing auto-incrementing view count functionality
+        # self.view_count += 1
+        # self.save(update_fields=['view_count'])
+        pass
     
     def get_reading_time(self):
         """Estimate reading time in minutes"""

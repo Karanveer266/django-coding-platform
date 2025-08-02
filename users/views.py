@@ -192,18 +192,7 @@ def dashboard_view(request):
     recent_blog_posts = BlogPost.objects.filter(status='published').order_by('-published_date')[:3]
     
     # Upcoming contests (placeholder)
-    upcoming_contests = [
-        {
-            'name': 'Weekly Contest #47',
-            'date': 'Tomorrow at 2:00 PM',
-            'type': 'weekly'
-        },
-        {
-            'name': 'Algorithm Marathon',
-            'date': 'Friday at 10:00 AM',
-            'type': 'marathon'
-        }
-    ]
+    upcoming_contests = []
     
     # Popular problems (based on submission count)
     popular_problems = Problem.objects.annotate(
@@ -219,7 +208,7 @@ def dashboard_view(request):
             'acceptance_rate': acceptance_rate,
             'current_streak': current_streak,
             'max_streak': user.max_streak,
-            'contest_rating': user.contest_rating,
+            # 'contest_rating': user.contest_rating,  # Removed
             'time_spent': total_time_spent,
             'difficulty_stats': difficulty_stats,
         },

@@ -10,7 +10,7 @@ class UserAdmin(BaseUserAdmin):
     list_display = [
         'username', 'email', 'first_name', 'last_name', 
         'is_active', 'is_staff', 'date_joined', 'last_login',
-        'contest_rating', 'current_streak', 'view_profile_link'
+        'problems_solved', 'current_streak', 'view_profile_link'  # Changed contest_rating to problems_solved
     ]
     list_filter = [
         'is_active', 'is_staff', 'is_superuser', 'date_joined', 
@@ -30,7 +30,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('preferred_language', 'theme_preference')
         }),
         ('Statistics', {
-            'fields': ('contest_rating', 'current_streak', 'total_problems_solved')
+            'fields': ('current_streak', 'max_streak', 'total_submissions', 'accepted_submissions')
         }),
     )
     

@@ -72,8 +72,6 @@ class Command(BaseCommand):
             )
             admin.bio = 'Platform administrator and coding enthusiast.'
             admin.location = 'San Francisco, CA'
-            admin.contest_rating = 2500
-            admin.current_streak = 15
             admin.save()
             self.stdout.write(f'Created admin user')
 
@@ -87,9 +85,7 @@ class Command(BaseCommand):
                 'bio': 'Software engineer passionate about algorithms and data structures.',
                 'location': 'New York, NY',
                 'github_username': 'alice-codes',
-                'preferred_language': 'py',
-                'contest_rating': 1800,
-                'current_streak': 7
+                'preferred_language': 'py'
             },
             {
                 'username': 'bob_pythonista',
@@ -99,9 +95,7 @@ class Command(BaseCommand):
                 'bio': 'Python developer and machine learning enthusiast.',
                 'location': 'Austin, TX',
                 'github_username': 'bob-ml',
-                'preferred_language': 'py',
-                'contest_rating': 1650,
-                'current_streak': 3
+                'preferred_language': 'py'
             },
             {
                 'username': 'charlie_cpp',
@@ -111,9 +105,7 @@ class Command(BaseCommand):
                 'bio': 'C++ expert focusing on competitive programming.',
                 'location': 'Seattle, WA',
                 'github_username': 'charlie-cpp',
-                'preferred_language': 'cpp',
-                'contest_rating': 2100,
-                'current_streak': 12
+                'preferred_language': 'cpp'
             }
         ]
         
@@ -147,8 +139,6 @@ class Command(BaseCommand):
                     last_name=f'{i+1}'
                 )
                 user.bio = f'Coding enthusiast #{i+1}'
-                user.contest_rating = random.randint(1200, 2000)
-                user.current_streak = random.randint(0, 20)
                 user.preferred_language = random.choice(['py', 'cpp', 'java'])
                 user.save()
 
@@ -414,8 +404,6 @@ Continue reading for more tips...''',
                     category=category,
                     status='published',
                     published_date=timezone.now() - timedelta(days=random.randint(1, 30)),
-                    view_count=random.randint(50, 500),
-                    like_count=random.randint(5, 50),
                     **post_data
                 )
                 
@@ -437,9 +425,7 @@ Continue reading for more tips...''',
                     author=random.choice(users),
                     category=random.choice(categories),
                     status='published',
-                    published_date=timezone.now() - timedelta(days=random.randint(1, 60)),
-                    view_count=random.randint(10, 200),
-                    like_count=random.randint(0, 20)
+                    published_date=timezone.now() - timedelta(days=random.randint(1, 60))
                 )
                 
                 # Add random tags

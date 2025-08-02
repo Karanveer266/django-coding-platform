@@ -55,7 +55,7 @@ def submit_solution(request, problem_id):
         
         # Judge the submission
         try:
-            judge_results = judge.judge_submission(code, language, test_cases)
+            judge_results = judge.judge_submission(code, language, test_cases, problem)
             
             # Update submission with results
             submission.status = judge_results['status']
@@ -63,6 +63,11 @@ def submit_solution(request, problem_id):
             submission.passed_test_cases = judge_results['passed_tests']
             submission.max_execution_time = judge_results['max_time']
             submission.score = (judge_results['passed_tests'] / judge_results['total_tests']) * 100
+            
+            # Store compilation errors if any
+            if judge_results.get('compilation_error'):
+                submission.error_data = judge_results['compilation_error']
+                
             submission.save()
             
             # Save individual test case results
@@ -78,7 +83,7 @@ def submit_solution(request, problem_id):
                         error_message=test_result['error']
                     )
             
-            return JsonResponse({
+            response_data = {
                 'submission_id': submission.id,
                 'status': judge_results['status'],
                 'passed_tests': judge_results['passed_tests'],
@@ -87,7 +92,14 @@ def submit_solution(request, problem_id):
                 'score': submission.score,
                 'message': 'Submission judged successfully',
                 'redirect_url': reverse('submit:submission_detail', args=[submission.id])
-            })
+            }
+            
+            # Include compilation error if any
+            if judge_results.get('compilation_error'):
+                response_data['compilation_error'] = judge_results['compilation_error']
+                response_data['message'] = 'Compilation failed'
+                
+            return JsonResponse(response_data)
             
         except Exception as e:
             logger.error(f"Error judging submission {submission.id}: {str(e)}")
@@ -168,3 +180,113 @@ def check_submission_status(request, submission_id):
         'score': submission.score,
         'max_time': submission.max_execution_time
     })
+
+@require_POST
+@login_required
+def test_code(request, problem_id):
+    """Test code against sample test cases without saving submission"""
+    problem = get_object_or_404(Problem, id=problem_id)
+    
+    try:
+        data = json.loads(request.body)
+        code = data.get('code', '').strip()
+        language = data.get('language', 'py').lower()
+        custom_input = data.get('custom_input', '').strip()
+        
+        if not code:
+            return JsonResponse({'error': 'Code cannot be empty'}, status=400)
+            
+        if language not in ['py', 'python', 'cpp', 'c++', 'java']:
+            return JsonResponse({'error': 'Unsupported language'}, status=400)
+        
+        if custom_input:
+            # Test with custom input
+            try:
+                output, error, exec_time, success = judge.execute_code(code, language, custom_input)
+                
+                return JsonResponse({
+                    'test_type': 'custom',
+                    'success': success,
+                    'output': output,
+                    'error': error,
+                    'execution_time': exec_time,
+                    'input': custom_input
+                })
+                
+            except Exception as e:
+                logger.error(f"Error testing custom input: {str(e)}")
+                return JsonResponse({
+                    'test_type': 'custom',
+                    'success': False,
+                    'error': str(e),
+                    'execution_time': 0
+                })
+        else:
+            # Test with sample test cases only
+            sample_test_cases = TestCase.objects.filter(
+                problem=problem, 
+                is_sample=True
+            ).order_by('id')
+            
+            if not sample_test_cases.exists():
+                # Use sample input/output from problem if no sample test cases
+                if problem.sample_input and problem.sample_output:
+                    try:
+                        output, error, exec_time, success = judge.execute_code(
+                            code, language, problem.sample_input
+                        )
+                        
+                        expected = problem.sample_output.strip()
+                        actual = output.strip()
+                        
+                        return JsonResponse({
+                            'test_type': 'sample',
+                            'success': success,
+                            'output': actual,
+                            'expected_output': expected,
+                            'error': error,
+                            'execution_time': exec_time,
+                            'input': problem.sample_input,
+                            'matches_expected': actual == expected
+                        })
+                        
+                    except Exception as e:
+                        logger.error(f"Error testing sample: {str(e)}")
+                        return JsonResponse({
+                            'test_type': 'sample',
+                            'success': False,
+                            'error': str(e),
+                            'execution_time': 0
+                        })
+                else:
+                    return JsonResponse({
+                        'error': 'No sample test cases or sample input/output available'
+                    }, status=400)
+            
+            # Test against sample test cases
+            try:
+                judge_results = judge.judge_submission(code, language, sample_test_cases, problem)
+                
+                return JsonResponse({
+                    'test_type': 'sample_cases',
+                    'status': judge_results['status'],
+                    'passed_tests': judge_results['passed_tests'],
+                    'total_tests': judge_results['total_tests'],
+                    'max_time': judge_results['max_time'],
+                    'test_results': judge_results['test_results'],
+                    'compilation_error': judge_results.get('compilation_error')
+                })
+                
+            except Exception as e:
+                logger.error(f"Error testing sample cases: {str(e)}")
+                return JsonResponse({
+                    'test_type': 'sample_cases',
+                    'success': False,
+                    'error': str(e)
+                })
+            
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        logger.error(f"Error in test_code: {str(e)}")
+        return JsonResponse({'error': 'An error occurred'}, status=500)

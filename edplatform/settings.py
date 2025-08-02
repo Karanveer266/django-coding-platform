@@ -198,6 +198,15 @@ OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
 OPENROUTER_SITE_URL = os.getenv('OPENROUTER_SITE_URL', 'http://localhost:8000')
 OPENROUTER_SITE_NAME = os.getenv('OPENROUTER_SITE_NAME', 'EdPlatform')
 
+# Code Judge Configuration
+JUDGE_DEFAULT_TIME_LIMIT = int(os.getenv('JUDGE_DEFAULT_TIME_LIMIT', 5))  # seconds
+JUDGE_DEFAULT_MEMORY_LIMIT = os.getenv('JUDGE_DEFAULT_MEMORY_LIMIT', '128m')
+JUDGE_COMPILE_TIMEOUT = int(os.getenv('JUDGE_COMPILE_TIMEOUT', 15))  # seconds
+JUDGE_SUPPORTED_LANGUAGES = os.getenv('JUDGE_SUPPORTED_LANGUAGES', 'python,py,cpp,java,javascript').split(',')
+
+# Contest Mode (disabled by default since no contests are held)
+CONTEST_MODE_ENABLED = os.getenv('CONTEST_MODE_ENABLED', 'False').lower() == 'true'
+
 # # Problem Types
 # PROBLEM_TYPES = [
 #     ('math', 'Mathematics'),

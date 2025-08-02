@@ -5,6 +5,7 @@ app_name = 'submit'
 
 urlpatterns = [
     path('submit/<int:problem_id>/', views.submit_solution, name='submit_solution'),
+    path('test/<int:problem_id>/', views.test_code, name='test_code'),
     path('submission/<int:submission_id>/', views.submission_detail, name='submission_detail'),
     path('my-submissions/', views.my_submissions, name='my_submissions'),
     path('status/<int:submission_id>/', views.check_submission_status, name='check_status'),

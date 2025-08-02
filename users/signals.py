@@ -14,8 +14,10 @@ def update_user_statistics(sender, instance, created, **kwargs):
     
     user = instance.user
     
-    # Update total submissions count
-    user.total_submissions = Submission.objects.filter(user=user).count()
+    # Update total submissions count - only for completed submissions (not PENDING/JUDGING)
+    user.total_submissions = Submission.objects.filter(
+        user=user
+    ).exclude(status__in=['PENDING', 'JUDGING']).count()
     
     # Update accepted submissions count
     user.accepted_submissions = Submission.objects.filter(
@@ -65,8 +67,7 @@ def create_user_profile_defaults(sender, instance, created, **kwargs):
     Set default values for new users
     """
     if created:
-        # Set initial contest rating and other defaults
-        instance.contest_rating = 1200
+        # Set initial defaults (no contest rating until they participate in contests)
         instance.current_streak = 0
         instance.max_streak = 0
         instance.save()
