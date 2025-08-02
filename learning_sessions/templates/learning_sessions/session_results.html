@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Session Results: {{ session.problem.title }} - CodePlatform{% endblock %}
+
+{% block meta_description %}View your learning session results for {{ session.problem.title }} with detailed analysis and recommendations.{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{% url 'learning_sessions:session_list' %}" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Learning Sessions
+        </a>
+    </div>
+
+    <!-- Results Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center w-16 h-16 rounded-full mb-4
+                {% if stats.accuracy >= 80 %}bg-green-100{% elif stats.accuracy >= 60 %}bg-yellow-100{% else %}bg-red-100{% endif %}">
+                <i class="text-2xl
+                    {% if stats.accuracy >= 80 %}fas fa-trophy text-green-600{% elif stats.accuracy >= 60 %}fas fa-medal text-yellow-600{% else %}fas fa-chart-line text-red-600{% endif %}"></i>
+            </div>
+            
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Learning Session Complete!</h1>
+            <p class="text-gray-600 mb-4">{{ session.problem.title }}</p>
+            
+            <div class="flex items-center justify-center space-x-8 text-sm">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900">{{ stats.accuracy|floatformat:1 }}%</div>
+                    <div class="text-gray-500">Accuracy</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900">{{ stats.correct_count }}/{{ stats.total_count }}</div>
+                    <div class="text-gray-500">Correct</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900">{{ stats.avg_time|floatformat:0 }}s</div>
+                    <div class="text-gray-500">Avg Time</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Analysis -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Overall Performance -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Performance Summary</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span>Accuracy</span>
+                        <span>{{ stats.accuracy|floatformat:1 }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full transition-all duration-500
+                            {% if stats.accuracy >= 80 %}bg-green-500{% elif stats.accuracy >= 60 %}bg-yellow-500{% else %}bg-red-500{% endif %}" 
+                             style="width: {{ stats.accuracy }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="pt-4 border-t border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Total Time</span>
+                        <span class="text-sm font-medium text-gray-900">{{ stats.total_time|floatformat:0 }}s</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Average per Question</span>
+                        <span class="text-sm font-medium text-gray-900">{{ stats.avg_time|floatformat:0 }}s</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendation -->
+        <div class="bg-blue-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-900 mb-4">Recommendation</h3>
+            
+            {% if stats.accuracy >= 80 %}
+                <div class="text-blue-800">
+                    <i class="fas fa-star text-blue-600 mb-2"></i>
+                    <p class="text-sm mb-3">Excellent work! You have a strong understanding of the concepts.</p>
+                    <p class="text-sm font-medium">Next Steps:</p>
+                    <ul class="text-sm mt-2 space-y-1">
+                        <li>• Try similar problems to reinforce learning</li>
+                        <li>• Challenge yourself with harder difficulties</li>
+                        <li>• Focus on optimizing your solutions</li>
+                    </ul>
+                </div>
+            {% elif stats.accuracy >= 60 %}
+                <div class="text-blue-800">
+                    <i class="fas fa-thumbs-up text-blue-600 mb-2"></i>
+                    <p class="text-sm mb-3">Good progress! You're on the right track.</p>
+                    <p class="text-sm font-medium">Areas to focus on:</p>
+                    <ul class="text-sm mt-2 space-y-1">
+                        <li>• Review the explanations for incorrect answers</li>
+                        <li>• Practice similar problem types</li>
+                        <li>• Study the underlying concepts more deeply</li>
+                    </ul>
+                </div>
+            {% else %}
+                <div class="text-blue-800">
+                    <i class="fas fa-book text-blue-600 mb-2"></i>
+                    <p class="text-sm mb-3">Keep learning! Understanding comes with practice.</p>
+                    <p class="text-sm font-medium">Recommended actions:</p>
+                    <ul class="text-sm mt-2 space-y-1">
+                        <li>• Review fundamental concepts</li>
+                        <li>• Take another session for this problem</li>
+                        <li>• Study the problem solution carefully</li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">What's Next?</h3>
+            
+            <div class="space-y-3">
+                <a href="{% url 'problems:detail' session.problem.id %}" class="btn-primary block text-center">
+                    <i class="fas fa-code mr-2"></i>Solve This Problem
+                </a>
+                
+                <a href="{% url 'learning_sessions:start_session' session.problem.id %}" class="btn-secondary block text-center">
+                    <i class="fas fa-redo mr-2"></i>Retake Session
+                </a>
+                
+                <a href="{% url 'problems:list' %}?difficulty={{ session.problem.difficulty }}" class="btn-secondary block text-center">
+                    <i class="fas fa-puzzle-piece mr-2"></i>Similar Problems
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Question by Question Analysis</h3>
+        </div>
+        
+        <div class="divide-y divide-gray-200">
+            {% for response in responses %}
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-3">
+                                <span class="flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium mr-3
+                                    {% if response.is_correct %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ response.mcq.sequence_order }}
+                                </span>
+                                <h4 class="text-base font-medium text-gray-900">{{ response.mcq.question_text }}</h4>
+                            </div>
+                            
+                            <div class="ml-11">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <p class="text-sm text-gray-600 mb-1">Your Answer:</p>
+                                        <p class="text-sm font-medium
+                                            {% if response.is_correct %}text-green-700{% else %}text-red-700{% endif %}">
+                                            {{ response.selected_answer }}) 
+                                            {% if response.selected_answer == 'A' %}{{ response.mcq.option_a }}
+                                            {% elif response.selected_answer == 'B' %}{{ response.mcq.option_b }}
+                                            {% elif response.selected_answer == 'C' %}{{ response.mcq.option_c }}
+                                            {% else %}{{ response.mcq.option_d }}{% endif %}
+                                        </p>
+                                    </div>
+                                    
+                                    {% if not response.is_correct %}
+                                        <div>
+                                            <p class="text-sm text-gray-600 mb-1">Correct Answer:</p>
+                                            <p class="text-sm font-medium text-green-700">
+                                                {{ response.mcq.correct_answer }}) 
+                                                {% if response.mcq.correct_answer == 'A' %}{{ response.mcq.option_a }}
+                                                {% elif response.mcq.correct_answer == 'B' %}{{ response.mcq.option_b }}
+                                                {% elif response.mcq.correct_answer == 'C' %}{{ response.mcq.option_c }}
+                                                {% else %}{{ response.mcq.option_d }}{% endif %}
+                                            </p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="bg-gray-50 rounded-lg p-4 mb-3">
+                                    <p class="text-sm text-gray-700">
+                                        <strong>Explanation:</strong> {{ response.mcq.explanation }}
+                                    </p>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                    <span>
+                                        <i class="fas fa-clock mr-1"></i>{{ response.time_taken_seconds }}s
+                                    </span>
+                                    <span>
+                                        <i class="fas fa-layer-group mr-1"></i>{{ response.mcq.difficulty_level|title }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ml-4">
+                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full
+                                {% if response.is_correct %}bg-green-100{% else %}bg-red-100{% endif %}">
+                                <i class="{% if response.is_correct %}fas fa-check text-green-600{% else %}fas fa-times text-red-600{% endif %}"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Submissions - CodePlatform{% endblock %}
+
+{% block meta_description %}View and manage your code submissions, track your progress, and review submission results.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">My Submissions</h1>
+                <p class="mt-2 text-gray-600">Track your coding progress and review submission results.</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{% url 'problems:list' %}" class="btn-secondary">
+                    <i class="fas fa-puzzle-piece mr-2"></i>Browse Problems
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="flex flex-wrap items-center gap-4">
+            <div>
+                <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select id="status-filter" class="form-select" onchange="applyFilters()">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex items-end">
+                <button onclick="clearFilters()" class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i>Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions List -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        {% if submissions %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Problem</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Language</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for submission in submissions %}
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">
+                                                <a href="{% url 'problems:detail' submission.problem.id %}" class="hover:text-blue-600">
+                                                    {{ submission.problem.title }}
+                                                </a>
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
+                                                    {% if submission.problem.difficulty == 'easy' %}difficulty-easy{% elif submission.problem.difficulty == 'medium' %}difficulty-medium{% else %}difficulty-hard{% endif %}">
+                                                    {{ submission.problem.get_difficulty_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ submission.get_language_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
+                                        {% if submission.status == 'ACCEPTED' %}status-accepted{% elif submission.status == 'WRONG_ANSWER' %}status-wrong-answer{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}status-time-limit{% elif submission.status == 'COMPILATION_ERROR' %}status-compilation-error{% elif submission.status == 'RUNTIME_ERROR' %}status-runtime-error{% else %}status-pending{% endif %}">
+                                        {{ submission.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {% if submission.total_test_cases %}
+                                        <div class="flex items-center">
+                                            <span class="font-medium">{{ submission.passed_test_cases }}/{{ submission.total_test_cases }}</span>
+                                            <span class="ml-2 text-gray-500">({{ submission.score|floatformat:1 }}%)</span>
+                                        </div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {% if submission.max_execution_time %}
+                                        {{ submission.max_execution_time|floatformat:3 }}s
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div title="{{ submission.submitted_at }}">
+                                        {{ submission.submitted_at|timesince }} ago
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <a href="{% url 'submit:submission_detail' submission.id %}" 
+                                           class="text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                                            <i class="fas fa-eye mr-1"></i>View
+                                        </a>
+                                        <a href="{% url 'problems:detail' submission.problem.id %}" 
+                                           class="text-green-600 hover:text-green-700 transition-colors duration-200">
+                                            <i class="fas fa-redo mr-1"></i>Retry
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-code text-gray-400 text-6xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No submissions yet</h3>
+                <p class="text-gray-500 mb-6">Start solving problems to see your submissions here.</p>
+                <a href="{% url 'problems:list' %}" class="btn-primary">
+                    <i class="fas fa-puzzle-piece mr-2"></i>Browse Problems
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function applyFilters() {
+    const status = document.getElementById('status-filter').value;
+    const params = new URLSearchParams(window.location.search);
+    
+    if (status) {
+        params.set('status', status);
+    } else {
+        params.delete('status');
+    }
+    
+    window.location.search = params.toString();
+}
+
+function clearFilters() {
+    window.location.href = window.location.pathname;
+}
+
+// Auto-refresh pending submissions
+setInterval(() => {
+    const pendingRows = document.querySelectorAll('tr:has(.status-pending)');
+    if (pendingRows.length > 0) {
+        location.reload();
+    }
+}, 5000);
+</script>
+{% endblock %}

@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Learning Session: {{ session.problem.title }} - CodePlatform{% endblock %}
+
+{% block meta_description %}Interactive learning session for {{ session.problem.title }} with MCQs to reinforce problem-solving concepts.{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{% url 'learning_sessions:session_list' %}" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Learning Sessions
+        </a>
+    </div>
+
+    <!-- Session Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ session.problem.title }}</h1>
+                <p class="text-gray-600 mt-1">Learning Session</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border
+                    {% if session.problem.difficulty == 'easy' %}difficulty-easy{% elif session.problem.difficulty == 'medium' %}difficulty-medium{% else %}difficulty-hard{% endif %}">
+                    {{ session.problem.get_difficulty_display }}
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                    {% if session.status == 'mcq_ready' %}bg-green-100 text-green-800{% elif session.status == 'in_progress' %}bg-blue-100 text-blue-800{% elif session.status == 'completed' %}bg-purple-100 text-purple-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                    {{ session.get_status_display }}
+                </span>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        {% if session.total_mcqs > 0 %}
+            <div class="mb-4">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Progress: {{ session.current_mcq_index }}/{{ session.total_mcqs }} questions</span>
+                    <span>Accuracy: {{ session.accuracy|floatformat:1 }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500" 
+                         style="width: {{ progress }}%"></div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="flex items-center space-x-6 text-sm text-gray-600">
+            <span><i class="fas fa-calendar mr-1"></i>Started {{ session.started_at|timesince }} ago</span>
+            {% if session.total_mcqs > 0 %}
+                <span><i class="fas fa-check-circle mr-1"></i>{{ session.correct_answers }} correct</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if session.status == 'completed' %}
+        <!-- Session Completed -->
+        <div class="text-center py-12">
+            <i class="fas fa-trophy text-yellow-500 text-6xl mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Session Completed!</h2>
+            <p class="text-gray-600 mb-6">Great job! You've completed all questions for this problem.</p>
+            <div class="flex justify-center space-x-4">
+                <a href="{% url 'learning_sessions:session_results' session.id %}" class="btn-primary">
+                    <i class="fas fa-chart-bar mr-2"></i>View Results
+                </a>
+                <a href="{% url 'problems:detail' session.problem.id %}" class="btn-secondary">
+                    <i class="fas fa-code mr-2"></i>Solve Problem
+                </a>
+            </div>
+        </div>
+    {% elif current_mcq %}
+        <!-- Current MCQ -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        Question {{ current_mcq.sequence_order }} of {{ session.total_mcqs }}
+                    </h2>
+                    <div class="flex items-center space-x-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {{ current_mcq.difficulty_level|title }}
+                        </span>
+                        <div id="timer" class="text-sm font-mono text-gray-600">
+                            <i class="fas fa-clock mr-1"></i><span id="timer-display">00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ current_mcq.question_text }}</h3>
+                    
+                    {% if current_mcq.hint_text %}
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6" id="hint-container" style="display: none;">
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-blue-600 mr-2 mt-1"></i>
+                                <div>
+                                    <h4 class="text-sm font-medium text-blue-900 mb-1">Hint</h4>
+                                    <p class="text-sm text-blue-800">{{ current_mcq.hint_text }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <form id="mcq-form" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="space-y-3">
+                        <label class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="answer" value="A" class="form-radio text-blue-600">
+                            <span class="ml-3 text-sm font-medium text-gray-900">A)</span>
+                            <span class="ml-2 text-sm text-gray-700">{{ current_mcq.option_a }}</span>
+                        </label>
+                        
+                        <label class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="answer" value="B" class="form-radio text-blue-600">
+                            <span class="ml-3 text-sm font-medium text-gray-900">B)</span>
+                            <span class="ml-2 text-sm text-gray-700">{{ current_mcq.option_b }}</span>
+                        </label>
+                        
+                        <label class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="answer" value="C" class="form-radio text-blue-600">
+                            <span class="ml-3 text-sm font-medium text-gray-900">C)</span>
+                            <span class="ml-2 text-sm text-gray-700">{{ current_mcq.option_c }}</span>
+                        </label>
+                        
+                        <label class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="answer" value="D" class="form-radio text-blue-600">
+                            <span class="ml-3 text-sm font-medium text-gray-900">D)</span>
+                            <span class="ml-2 text-sm text-gray-700">{{ current_mcq.option_d }}</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-6">
+                        <div class="flex space-x-3">
+                            {% if current_mcq.hint_text %}
+                                <button type="button" id="hint-btn" class="btn-secondary">
+                                    <i class="fas fa-lightbulb mr-2"></i>Show Hint
+                                </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button type="submit" id="submit-btn" class="btn-primary" disabled>
+                                <i class="fas fa-check mr-2"></i>Submit Answer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Answer Result (Hidden initially) -->
+                <div id="answer-result" class="mt-6 hidden">
+                    <!-- Result will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- No MCQs Available -->
+        <div class="text-center py-12">
+            <i class="fas fa-exclamation-circle text-gray-400 text-6xl mb-4"></i>
+            <h2 class="text-xl font-medium text-gray-900 mb-2">No questions available</h2>
+            <p class="text-gray-500 mb-6">There was an issue generating questions for this session.</p>
+            <a href="{% url 'learning_sessions:session_list' %}" class="btn-primary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Sessions
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let startTime = Date.now();
+let timerInterval;
+
+document.addEventListener('DOMContentLoaded', function() {
+    {% if current_mcq %}
+        startTimer();
+        initializeMCQForm();
+    {% endif %}
+});
+
+function startTimer() {
+    timerInterval = setInterval(function() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        document.getElementById('timer-display').textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+function initializeMCQForm() {
+    const form = document.getElementById('mcq-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const hintBtn = document.getElementById('hint-btn');
+    const hintContainer = document.getElementById('hint-container');
+    const answerInputs = document.querySelectorAll('input[name="answer"]');
+    
+    // Enable submit button when an answer is selected
+    answerInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            submitBtn.disabled = false;
+        });
+    });
+    
+    // Hint button handler
+    if (hintBtn && hintContainer) {
+        hintBtn.addEventListener('click', function() {
+            hintContainer.style.display = 'block';
+            hintBtn.style.display = 'none';
+        });
+    }
+    
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+        if (!selectedAnswer) {
+            CodePlatform.showToast('Please select an answer', 'warning');
+            return;
+        }
+        
+        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+        
+        // Disable form
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+        answerInputs.forEach(input => input.disabled = true);
+        
+        // Stop timer
+        clearInterval(timerInterval);
+        
+        try {
+            const response = await fetch('{% url "learning_sessions:submit_answer" session.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    answer: selectedAnswer.value,
+                    time_taken: timeTaken
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                CodePlatform.showToast(data.error, 'error');
+                // Re-enable form
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Submit Answer';
+                answerInputs.forEach(input => input.disabled = false);
+                startTimer();
+                return;
+            }
+            
+            // Show result
+            showAnswerResult(data);
+            
+        } catch (error) {
+            console.error('Error submitting answer:', error);
+            CodePlatform.showToast('Network error. Please try again.', 'error');
+            // Re-enable form
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Submit Answer';
+            answerInputs.forEach(input => input.disabled = false);
+            startTimer();
+        }
+    });
+}
+
+function showAnswerResult(data) {
+    const resultDiv = document.getElementById('answer-result');
+    const isCorrect = data.correct;
+    
+    const resultClass = isCorrect ? 'bg-green-100 border-green-200' : 'bg-red-100 border-red-200';
+    const textClass = isCorrect ? 'text-green-800' : 'text-red-800';
+    const iconClass = isCorrect ? 'fas fa-check-circle text-green-600' : 'fas fa-times-circle text-red-600';
+    
+    resultDiv.className = `mt-6 p-4 rounded-lg border ${resultClass}`;
+    resultDiv.innerHTML = `
+        <div class="${textClass}">
+            <div class="flex items-center mb-3">
+                <i class="${iconClass} mr-2"></i>
+                <span class="font-semibold">${isCorrect ? 'Correct!' : 'Incorrect'}</span>
+            </div>
+            ${!isCorrect ? `<p class="text-sm mb-2">The correct answer is: <strong>${data.correct_answer}</strong></p>` : ''}
+            <p class="text-sm mb-4">${data.explanation}</p>
+            <div class="text-sm">
+                <p>Current accuracy: ${data.accuracy.toFixed(1)}%</p>
+                <p>Progress: ${data.progress.toFixed(1)}%</p>
+            </div>
+        </div>
+    `;
+    
+    resultDiv.classList.remove('hidden');
+    
+    // Show next question button or completion message
+    if (data.session_completed) {
+        setTimeout(() => {
+            window.location.href = '{% url "learning_sessions:session_results" session.id %}';
+        }, 3000);
+    } else if (data.next_question) {
+        setTimeout(() => {
+            window.location.reload();
+        }, 3000);
+    }
+}
+</script>
+{% endblock %}

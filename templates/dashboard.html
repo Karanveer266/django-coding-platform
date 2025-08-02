@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - CodePlatform{% endblock %}
+
+{% block meta_description %}View your coding progress, statistics, and recent activity on CodePlatform.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Welcome Section -->
+    <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg p-6 text-white mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    Welcome back{% if user.username %}, {{ user.username }}{% endif %}!
+                </h1>
+                <p class="text-blue-100">Ready to tackle some challenging problems today?</p>
+            </div>
+            <div class="hidden md:block">
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-code text-2xl text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 card-hover">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check text-white"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Problems Solved</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.problems_solved }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 card-hover">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-fire text-white"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Current Streak</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.current_streak }} day{{ stats.current_streak|pluralize }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 card-hover">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-star text-white"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Contest Rating</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.contest_rating }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 card-hover">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-percentage text-white"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Acceptance Rate</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.acceptance_rate }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Recent Activity -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                </div>
+                <div class="p-6">
+                    {% if recent_submissions %}
+                        <div class="space-y-4">
+                            {% for submission in recent_submissions %}
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center
+                                            {% if submission.status == 'ACCEPTED' %}bg-green-500{% elif submission.status == 'WRONG_ANSWER' %}bg-red-500{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}bg-orange-500{% else %}bg-blue-500{% endif %}">
+                                            <i class="text-white text-sm
+                                                {% if submission.status == 'ACCEPTED' %}fas fa-check{% elif submission.status == 'WRONG_ANSWER' %}fas fa-times{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}fas fa-clock{% else %}fas fa-hourglass-half{% endif %}"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">{{ submission.problem.title }}</p>
+                                            <p class="text-xs text-gray-500">{{ submission.submitted_at|timesince }} ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
+                                            {% if submission.problem.difficulty == 'easy' %}difficulty-easy{% elif submission.problem.difficulty == 'medium' %}difficulty-medium{% else %}difficulty-hard{% endif %}">
+                                            {{ submission.problem.get_difficulty_display }}
+                                        </span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
+                                            {% if submission.status == 'ACCEPTED' %}status-accepted{% elif submission.status == 'WRONG_ANSWER' %}status-wrong-answer{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}status-time-limit{% else %}status-pending{% endif %}">
+                                            {{ submission.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-code text-4xl text-gray-300 mb-4"></i>
+                            <h4 class="text-lg font-medium text-gray-900 mb-2">No submissions yet</h4>
+                            <p class="text-gray-500 mb-4">Start solving problems to see your activity here</p>
+                            <a href="{% url 'problems:list' %}" class="btn-primary">
+                                <i class="fas fa-puzzle-piece mr-2"></i>Browse Problems
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Quick Actions</h3>
+                </div>
+                <div class="p-6 space-y-3">
+                    <a href="{% url 'problems:list' %}" class="btn-primary block text-center">
+                        <i class="fas fa-puzzle-piece mr-2"></i>Browse Problems
+                    </a>
+                    <a href="{% url 'blogs:list' %}" class="btn-secondary block text-center">
+                        <i class="fas fa-blog mr-2"></i>Read Blog
+                    </a>
+                    <a href="{% url 'learning_sessions:session_list' %}" class="btn-secondary block text-center">
+                        <i class="fas fa-graduation-cap mr-2"></i>Learning Sessions
+                    </a>
+                </div>
+            </div>
+
+            <!-- Difficulty Breakdown -->
+            {% if stats.difficulty_stats %}
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Problems by Difficulty</h3>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-3">
+                        {% for difficulty, count in stats.difficulty_stats.items %}
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
+                                        {% if difficulty == 'easy' %}difficulty-easy{% elif difficulty == 'medium' %}difficulty-medium{% else %}difficulty-hard{% endif %}">
+                                        {{ difficulty|title }}
+                                    </span>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">{{ count }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Upcoming Contests -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Upcoming Contests</h3>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-3">
+                        {% for contest in upcoming_contests %}
+                            <div class="border-l-4 {% if contest.type == 'weekly' %}border-blue-400{% else %}border-purple-400{% endif %} pl-4">
+                                <p class="text-sm font-medium text-gray-900">{{ contest.name }}</p>
+                                <p class="text-xs text-gray-500">{{ contest.date }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Blog Posts -->
+    {% if recent_blog_posts %}
+    <div class="bg-white rounded-lg shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Latest from our Blog</h3>
+                <a href="{% url 'blogs:list' %}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    View all <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {% for post in recent_blog_posts %}
+                    <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200">
+                        {% if post.featured_image %}
+                            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-32 object-cover">
+                        {% else %}
+                            <div class="w-full h-32 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                                <i class="fas fa-blog text-white text-2xl"></i>
+                            </div>
+                        {% endif %}
+                        <div class="p-4">
+                            <h4 class="font-medium text-gray-900 mb-2 line-clamp-2">{{ post.title }}</h4>
+                            <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ post.excerpt }}</p>
+                            <div class="flex items-center justify-between text-xs text-gray-400">
+                                <span>{{ post.author.username }}</span>
+                                <span>{{ post.published_date|timesince }} ago</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

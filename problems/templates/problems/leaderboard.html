@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leaderboard - CodePlatform{% endblock %}
+
+{% block meta_description %}View the CodePlatform leaderboard featuring top performers and their coding achievements.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                <i class="fas fa-trophy text-yellow-500 mr-3"></i>Leaderboard
+            </h1>
+            <p class="mt-2 text-gray-600">Top performers on CodePlatform</p>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600">
+                <h3 class="text-lg font-medium text-white">Global Rankings</h3>
+            </div>
+            
+            {% if top_users %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Rank
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    User
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Problems Solved
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Total Submissions
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Success Rate
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Avg. Time
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for user_data in top_users %}
+                            <tr class="hover:bg-gray-50 {% if user_data.user__username == user.username %}bg-blue-50{% endif %}">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        {% if forloop.counter == 1 %}
+                                            <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-crown text-white text-sm"></i>
+                                            </div>
+                                        {% elif forloop.counter == 2 %}
+                                            <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-medal text-white text-sm"></i>
+                                            </div>
+                                        {% elif forloop.counter == 3 %}
+                                            <div class="w-8 h-8 bg-yellow-600 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-medal text-white text-sm"></i>
+                                            </div>
+                                        {% else %}
+                                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-semibold">
+                                                {{ forloop.counter }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium mr-3">
+                                            {{ user_data.user__username.0|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ user_data.user__username }}
+                                                {% if user_data.user__username == user.username %}
+                                                    <span class="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">You</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-semibold text-green-600">
+                                        {{ user_data.problems_solved }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">
+                                        {{ user_data.total_submissions }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% with success_rate=user_data.problems_solved|mul:100|div:user_data.total_submissions %}
+                                        {% if success_rate >= 80 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                {{ success_rate|floatformat:1 }}%
+                                            </span>
+                                        {% elif success_rate >= 60 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                {{ success_rate|floatformat:1 }}%
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                {{ success_rate|floatformat:1 }}%
+                                            </span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">
+                                        {% if user_data.avg_time %}
+                                            {{ user_data.avg_time|floatformat:2 }}s
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="px-6 py-12 text-center">
+                    <i class="fas fa-chart-line text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No data available</h3>
+                    <p class="text-gray-500">Start solving problems to appear on the leaderboard!</p>
+                    <a href="/problems/" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <i class="fas fa-puzzle-piece mr-2"></i>
+                        Browse Problems
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Statistics -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-users text-white"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Active Users</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ top_users|length }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Problems Solved</p>
+                        <p class="text-2xl font-semibold text-gray-900">
+                            {% if top_users %}{{ top_users.0.problems_solved }}{% else %}0{% endif %}
+                        </p>
+                        <p class="text-xs text-gray-500">by top user</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-fire text-white"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Your Rank</p>
+                        <p class="text-2xl font-semibold text-gray-900">
+                            {% for user_data in top_users %}
+                                {% if user_data.user__username == user.username %}
+                                    #{{ forloop.counter }}
+                                {% endif %}
+                            {% empty %}
+                                N/A
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}

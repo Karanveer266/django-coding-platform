@@ -1,0 +1,22 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}CodePlatform - Master Your Coding Skills{% endblock %}</title>
+    {% tailwind_css %}
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 text-black font-serif leading-normal tracking-normal">
+    <!-- Main Content -->
+    <main id="main-content" class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
+</body>
+</html>

@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Learning Sessions - CodePlatform{% endblock %}
+
+{% block meta_description %}Access your learning sessions, review MCQ progress, and enhance your coding knowledge through interactive sessions.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Learning Sessions</h1>
+                <p class="mt-2 text-gray-600">Interactive MCQ sessions to reinforce your problem-solving concepts.</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{% url 'problems:list' %}" class="btn-secondary">
+                    <i class="fas fa-puzzle-piece mr-2"></i>Browse Problems
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Sessions -->
+    {% if active_sessions %}
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Active Sessions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for session in active_sessions %}
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-gray-900">{{ session.problem.title }}</h3>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if session.status == 'started' %}bg-blue-100 text-blue-800{% elif session.status == 'mcq_generation' %}bg-yellow-100 text-yellow-800{% elif session.status == 'mcq_ready' %}bg-green-100 text-green-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                                    {{ session.get_status_display }}
+                                </span>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    Started {{ session.started_at|timesince }} ago
+                                </div>
+                                
+                                {% if session.total_mcqs > 0 %}
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-question-circle mr-2"></i>
+                                        {{ session.current_mcq_index }}/{{ session.total_mcqs }} questions
+                                    </div>
+                                    
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-chart-line mr-2"></i>
+                                        {{ session.accuracy|floatformat:1 }}% accuracy
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            {% if session.total_mcqs > 0 %}
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                        <span>Progress</span>
+                                        <span>{{ session.current_mcq_index }}/{{ session.total_mcqs }}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                             style="width: {{ session.current_mcq_index|div:session.total_mcqs|mul:100 }}%"></div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="flex space-x-2">
+                                <a href="{% url 'learning_sessions:session_detail' session.id %}" class="btn-primary flex-1 text-center">
+                                    {% if session.status == 'started' %}
+                                        <i class="fas fa-play mr-2"></i>Start Session
+                                    {% else %}
+                                        <i class="fas fa-arrow-right mr-2"></i>Continue
+                                    {% endif %}
+                                </a>
+                                <a href="{% url 'problems:detail' session.problem.id %}" class="btn-secondary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Completed Sessions -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            {% if completed_sessions %}
+                Completed Sessions ({{ completed_sessions.count }})
+            {% else %}
+                No Learning Sessions Yet
+            {% endif %}
+        </h2>
+        
+        {% if completed_sessions %}
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Problem</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Difficulty</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for session in completed_sessions %}
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">{{ session.problem.title }}</div>
+                                            <div class="text-sm text-gray-500">{{ session.problem.tags.all|join:", " }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
+                                            {% if session.problem.difficulty == 'easy' %}difficulty-easy{% elif session.problem.difficulty == 'medium' %}difficulty-medium{% else %}difficulty-hard{% endif %}">
+                                            {{ session.problem.get_difficulty_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-sm font-medium text-gray-900">{{ session.correct_answers }}/{{ session.total_mcqs }}</span>
+                                            <span class="ml-2 text-sm text-gray-500">({{ session.accuracy|floatformat:1 }}%)</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ session.completed_at|timesince }} ago
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <a href="{% url 'learning_sessions:session_results' session.id %}" 
+                                               class="text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                                                <i class="fas fa-chart-bar mr-1"></i>Results
+                                            </a>
+                                            <a href="{% url 'problems:detail' session.problem.id %}" 
+                                               class="text-green-600 hover:text-green-700 transition-colors duration-200">
+                                                <i class="fas fa-puzzle-piece mr-1"></i>Problem
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-graduation-cap text-gray-400 text-6xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Start Your Learning Journey</h3>
+                <p class="text-gray-500 mb-6">Learning sessions help you understand problem-solving concepts through interactive MCQs.</p>
+                <a href="{% url 'problems:list' %}" class="btn-primary">
+                    <i class="fas fa-puzzle-piece mr-2"></i>Browse Problems
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Learning Tips -->
+    <div class="bg-blue-50 rounded-lg p-6">
+        <div class="flex items-start">
+            <i class="fas fa-lightbulb text-blue-600 text-xl mr-4 mt-1"></i>
+            <div>
+                <h3 class="text-lg font-semibold text-blue-900 mb-2">How Learning Sessions Work</h3>
+                <ul class="text-blue-800 space-y-1 text-sm">
+                    <li>• Each session contains 5 carefully crafted MCQs about problem-solving concepts</li>
+                    <li>• Questions cover time complexity, data structures, algorithms, and edge cases</li>
+                    <li>• Get instant feedback with detailed explanations for each answer</li>
+                    <li>• Track your progress and identify areas for improvement</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Log in - FIXED VERSION</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100">
+
+  <div class="w-full max-w-md bg-white rounded shadow p-8">
+    <h1 class="text-2xl font-bold text-center mb-6">Sign in - UPDATED</h1>
+    <p class="text-center text-sm text-gray-600 mb-4">Version: 2025-08-02-FIXED</p>
+
+    <!-- Either identifier may be filled; the JS below enforces that rule -->
+    <form id="loginForm" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium mb-1">Username (optional)</label>
+        <input name="username" type="text"
+               class="w-full rounded border px-3 py-2 focus:ring focus:border-blue-400" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">E-mail (optional)</label>
+        <input name="email" type="email"
+               class="w-full rounded border px-3 py-2 focus:ring focus:border-blue-400" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Password</label>
+        <input name="password" type="password" required
+               class="w-full rounded border px-3 py-2 focus:ring focus:border-blue-400" />
+      </div>
+
+      <button type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">
+        Log in
+      </button>
+    </form>
+
+    <div class="mt-4 text-center">
+      <p class="text-sm text-gray-600">
+        Don't have an account? 
+        <a href="/signup/" class="text-blue-600 hover:text-blue-800">Sign up</a>
+      </p>
+    </div>
+
+    <p id="error"
+       class="hidden mt-4 text-center text-red-600"></p>
+  </div>
+
+<script>
+console.log('NEW LOGIN TEMPLATE LOADED - 2025-08-02');
+
+// Function to get CSRF token from cookie
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+const form  = document.getElementById('loginForm');
+const errEl = document.getElementById('error');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(form);
+  const username = formData.get('username');
+  const email = formData.get('email');
+  const password = formData.get('password');
+
+  // Validate: at least one identifier must be provided
+  if (!username && !email) {
+    errEl.textContent = "Please provide either username or email";
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  // Prepare payload
+  const payload = { password };
+  if (username) payload.username = username;
+  if (email) payload.email = email;
+
+  console.log('Sending request to: /login/');
+  console.log('Payload:', payload);
+
+  try {
+    const response = await fetch('/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken'),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log('Response status:', response.status);
+    console.log('Response URL:', response.url);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Show error from server or a generic message
+      const errorMsg = data.non_field_errors?.[0] || "Login failed";
+      errEl.textContent = errorMsg;
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    // Success! Redirect to dashboard
+    window.location.href = data.redirect_url || '/dashboard/';
+  } catch (error) {
+    console.error('Login error:', error);
+    errEl.textContent = "Network error. Please try again.";
+    errEl.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>

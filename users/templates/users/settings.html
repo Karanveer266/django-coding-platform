@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Settings - CodePlatform{% endblock %}
+
+{% block meta_description %}Manage your CodePlatform account settings, preferences, and profile information.{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{% url 'users:profile' %}" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Profile
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Account Settings</h1>
+        <p class="mt-2 text-gray-600">Manage your account information, preferences, and privacy settings.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Settings Navigation -->
+        <div class="lg:col-span-1">
+            <nav class="space-y-1">
+                <a href="#profile" onclick="showSection('profile')" 
+                   class="nav-tab active bg-blue-50 border-blue-500 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4">
+                    <i class="fas fa-user mr-3"></i>Profile
+                </a>
+                <a href="#account" onclick="showSection('account')" 
+                   class="nav-tab border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4">
+                    <i class="fas fa-cog mr-3"></i>Account
+                </a>
+                <a href="#preferences" onclick="showSection('preferences')" 
+                   class="nav-tab border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4">
+                    <i class="fas fa-palette mr-3"></i>Preferences
+                </a>
+                <a href="#privacy" onclick="showSection('privacy')" 
+                   class="nav-tab border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4">
+                    <i class="fas fa-shield-alt mr-3"></i>Privacy
+                </a>
+                <a href="#notifications" onclick="showSection('notifications')" 
+                   class="nav-tab border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4">
+                    <i class="fas fa-bell mr-3"></i>Notifications
+                </a>
+            </nav>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="lg:col-span-3">
+            <form method="post" enctype="multipart/form-data" class="space-y-8">
+                {% csrf_token %}
+                
+                <!-- Profile Section -->
+                <div id="profile-section" class="settings-section bg-white shadow-sm rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Profile Information</h3>
+                        <p class="text-sm text-gray-600">Update your public profile information.</p>
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        <!-- Avatar -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                            <div class="flex items-center space-x-6">
+                                <img src="{{ user.get_avatar_url }}" alt="{{ user.username }}" 
+                                     class="w-16 h-16 rounded-full object-cover">
+                                <div>
+                                    <input type="file" name="avatar" accept="image/*" 
+                                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    <p class="text-xs text-gray-500 mt-1">JPG, PNG or GIF. Max size 2MB.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Username -->
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                            <input type="text" name="username" id="username" value="{{ user.username }}"
+                                   class="form-input" placeholder="Enter username">
+                            <p class="text-xs text-gray-500 mt-1">This is how others will see you on the platform.</p>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                            <input type="email" name="email" id="email" value="{{ user.email }}"
+                                   class="form-input" placeholder="Enter email address">
+                            <p class="text-xs text-gray-500 mt-1">Used for account notifications and recovery.</p>
+                        </div>
+                        
+                        <!-- Bio -->
+                        <div>
+                            <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                            <textarea name="bio" id="bio" rows="4" class="form-textarea" 
+                                      placeholder="Tell us about yourself...">{{ user.bio }}</textarea>
+                            <p class="text-xs text-gray-500 mt-1">Brief description for your profile. Max 500 characters.</p>
+                        </div>
+                        
+                        <!-- Location -->
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                            <input type="text" name="location" id="location" value="{{ user.location }}"
+                                   class="form-input" placeholder="e.g. San Francisco, CA">
+                        </div>
+                        
+                        <!-- Website -->
+                        <div>
+                            <label for="website" class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                            <input type="url" name="website" id="website" value="{{ user.website }}"
+                                   class="form-input" placeholder="https://yourwebsite.com">
+                        </div>
+                        
+                        <!-- Social Links -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="github_username" class="block text-sm font-medium text-gray-700 mb-2">GitHub Username</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fab fa-github text-gray-400"></i>
+                                    </div>
+                                    <input type="text" name="github_username" id="github_username" 
+                                           value="{{ user.github_username }}" class="form-input pl-10" 
+                                           placeholder="username">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="linkedin_url" class="block text-sm font-medium text-gray-700 mb-2">LinkedIn URL</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fab fa-linkedin text-gray-400"></i>
+                                    </div>
+                                    <input type="url" name="linkedin_url" id="linkedin_url" 
+                                           value="{{ user.linkedin_url }}" class="form-input pl-10" 
+                                           placeholder="https://linkedin.com/in/username">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Account Section -->
+                <div id="account-section" class="settings-section bg-white shadow-sm rounded-lg hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Account Settings</h3>
+                        <p class="text-sm text-gray-600">Manage your account security and login settings.</p>
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        <!-- Password Change -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-md font-medium text-gray-900 mb-2">Change Password</h4>
+                            <p class="text-sm text-gray-600 mb-4">Update your password to keep your account secure.</p>
+                            <button type="button" class="btn-secondary" onclick="changePassword()">
+                                <i class="fas fa-key mr-2"></i>Change Password
+                            </button>
+                        </div>
+                        
+                        <!-- Two-Factor Authentication -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-md font-medium text-gray-900">Two-Factor Authentication</h4>
+                                    <p class="text-sm text-gray-600">Add an extra layer of security to your account.</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                    <span class="ml-2 text-sm text-gray-600">Enable</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Login Sessions -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-md font-medium text-gray-900 mb-2">Active Sessions</h4>
+                            <p class="text-sm text-gray-600 mb-4">Manage your active login sessions.</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-desktop text-gray-400"></i>
+                                        <div>
+                                            <p class="text-sm font-medium">Current Session</p>
+                                            <p class="text-xs text-gray-500">Windows • Chrome • Last active now</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-green-600 font-medium">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preferences Section -->
+                <div id="preferences-section" class="settings-section bg-white shadow-sm rounded-lg hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Preferences</h3>
+                        <p class="text-sm text-gray-600">Customize your coding and interface preferences.</p>
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        <!-- Preferred Language -->
+                        <div>
+                            <label for="preferred_language" class="block text-sm font-medium text-gray-700 mb-2">Preferred Programming Language</label>
+                            <select name="preferred_language" id="preferred_language" class="form-select">
+                                <option value="py" {% if user.preferred_language == 'py' %}selected{% endif %}>Python</option>
+                                <option value="cpp" {% if user.preferred_language == 'cpp' %}selected{% endif %}>C++</option>
+                                <option value="java" {% if user.preferred_language == 'java' %}selected{% endif %}>Java</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Default language for code editor.</p>
+                        </div>
+                        
+                        <!-- Theme Preference -->
+                        <div>
+                            <label for="theme_preference" class="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                            <select name="theme_preference" id="theme_preference" class="form-select">
+                                <option value="light" {% if user.theme_preference == 'light' %}selected{% endif %}>Light</option>
+                                <option value="dark" {% if user.theme_preference == 'dark' %}selected{% endif %}>Dark</option>
+                                <option value="auto" {% if user.theme_preference == 'auto' %}selected{% endif %}>Auto (System)</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Choose your preferred interface theme.</p>
+                        </div>
+                        
+                        <!-- Editor Settings -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-md font-medium text-gray-900 mb-4">Code Editor</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Auto-complete</p>
+                                        <p class="text-xs text-gray-600">Enable code auto-completion</p>
+                                    </div>
+                                    <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Line Numbers</p>
+                                        <p class="text-xs text-gray-600">Show line numbers in editor</p>
+                                    </div>
+                                    <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-900 mb-1">Font Size</label>
+                                    <select class="form-select">
+                                        <option>12px</option>
+                                        <option selected>14px</option>
+                                        <option>16px</option>
+                                        <option>18px</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Privacy Section -->
+                <div id="privacy-section" class="settings-section bg-white shadow-sm rounded-lg hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Privacy Settings</h3>
+                        <p class="text-sm text-gray-600">Control what information is visible to others.</p>
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Public Profile</p>
+                                    <p class="text-xs text-gray-600">Allow others to view your profile</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Show Statistics</p>
+                                    <p class="text-xs text-gray-600">Display your coding statistics publicly</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Show Activity</p>
+                                    <p class="text-xs text-gray-600">Display your recent submissions</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Allow Messages</p>
+                                    <p class="text-xs text-gray-600">Let other users send you messages</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notifications Section -->
+                <div id="notifications-section" class="settings-section bg-white shadow-sm rounded-lg hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Notification Preferences</h3>
+                        <p class="text-sm text-gray-600">Choose what notifications you want to receive.</p>
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        <div class="space-y-4">
+                            <h4 class="text-md font-medium text-gray-900">Email Notifications</h4>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Contest Reminders</p>
+                                    <p class="text-xs text-gray-600">Get notified about upcoming contests</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Blog Comments</p>
+                                    <p class="text-xs text-gray-600">When someone comments on your blog posts</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Weekly Summary</p>
+                                    <p class="text-xs text-gray-600">Weekly digest of your activity</p>
+                                </div>
+                                <input type="checkbox" class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <h4 class="text-md font-medium text-gray-900">Push Notifications</h4>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">New Messages</p>
+                                    <p class="text-xs text-gray-600">When you receive a new message</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Contest Results</p>
+                                    <p class="text-xs text-gray-600">When contest results are published</p>
+                                </div>
+                                <input type="checkbox" class="rounded border-gray-300 text-blue-600 shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                    <button type="button" onclick="resetForm()" class="btn-secondary">
+                        <i class="fas fa-undo mr-2"></i>Reset Changes
+                    </button>
+                    
+                    <div class="flex space-x-3">
+                        <button type="button" onclick="saveDraft()" class="btn-secondary">
+                            <i class="fas fa-save mr-2"></i>Save Draft
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-check mr-2"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    showSection('profile'); // Show profile section by default
+});
+
+function showSection(sectionName) {
+    // Hide all sections
+    const sections = document.querySelectorAll('.settings-section');
+    sections.forEach(section => section.classList.add('hidden'));
+    
+    // Show selected section
+    const targetSection = document.getElementById(sectionName + '-section');
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+    }
+    
+    // Update navigation
+    const navTabs = document.querySelectorAll('.nav-tab');
+    navTabs.forEach(tab => {
+        tab.classList.remove('active', 'bg-blue-50', 'border-blue-500', 'text-blue-700');
+        tab.classList.add('border-transparent', 'text-gray-600', 'hover:text-gray-900', 'hover:bg-gray-50');
+    });
+    
+    // Activate current tab
+    const activeTab = document.querySelector(`[href="#${sectionName}"]`);
+    if (activeTab) {
+        activeTab.classList.add('active', 'bg-blue-50', 'border-blue-500', 'text-blue-700');
+        activeTab.classList.remove('border-transparent', 'text-gray-600', 'hover:text-gray-900', 'hover:bg-gray-50');
+    }
+}
+
+function changePassword() {
+    CodePlatform.showToast('Password change functionality coming soon!', 'info');
+}
+
+function resetForm() {
+    if (confirm('Are you sure you want to reset all changes?')) {
+        location.reload();
+    }
+}
+
+function saveDraft() {
+    CodePlatform.showToast('Draft saved locally!', 'success');
+}
+
+// Auto-save functionality
+let autoSaveTimeout;
+const form = document.querySelector('form');
+
+form.addEventListener('input', function() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+        // Auto-save logic here
+        console.log('Auto-saving settings...');
+    }, 5000);
+});
+</script>
+{% endblock %}

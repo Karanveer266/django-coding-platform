@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FIXED LOGIN PAGE - 2025-08-02</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100">
+
+  <div class="w-full max-w-md bg-white rounded shadow p-8">
+    <h1 class="text-2xl font-bold text-center mb-6">FIXED LOGIN - NO CACHE</h1>
+    <p class="text-center text-sm text-red-600 mb-4">TIMESTAMP: 2025-08-02 - VERSION 3</p>
+
+    <form id="loginForm" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium mb-1">Username (optional)</label>
+        <input name="username" type="text"
+               class="w-full rounded border px-3 py-2 focus:ring focus:border-blue-400" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">E-mail (optional)</label>
+        <input name="email" type="email"
+               class="w-full rounded border px-3 py-2 focus:ring focus:border-blue-400" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Password</label>
+        <input name="password" type="password" required
+               class="w-full rounded border px-3 py-2 focus:ring focus:border-blue-400" />
+      </div>
+
+      <button type="submit"
+              class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">
+        FIXED LOGIN BUTTON
+      </button>
+    </form>
+
+    <div class="mt-4 text-center">
+      <p class="text-sm text-gray-600">
+        Don't have an account? 
+        <a href="/signup/" class="text-blue-600 hover:text-blue-800">Sign up</a>
+      </p>
+    </div>
+
+    <p id="error" class="hidden mt-4 text-center text-red-600"></p>
+  </div>
+
+<script>
+console.log('=== FIXED LOGIN TEMPLATE LOADED - 2025-08-02 ===');
+alert('FIXED TEMPLATE LOADED!');
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+const form = document.getElementById('loginForm');
+const errEl = document.getElementById('error');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const formData = new FormData(form);
+  const username = formData.get('username');
+  const email = formData.get('email');
+  const password = formData.get('password');
+
+  if (!username && !email) {
+    errEl.textContent = "Please provide either username or email";
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const payload = { password };
+  if (username) payload.username = username;
+  if (email) payload.email = email;
+
+  console.log('=== SENDING TO CORRECT URL: /login/ ===');
+  console.log('Payload:', payload);
+
+  try {
+    const response = await fetch('/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken'),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log('Response status:', response.status);
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorMsg = data.non_field_errors?.[0] || "Login failed";
+      errEl.textContent = errorMsg;
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    window.location.href = data.redirect_url || '/dashboard/';
+  } catch (error) {
+    console.error('Login error:', error);
+    errEl.textContent = "Network error. Please try again.";
+    errEl.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>

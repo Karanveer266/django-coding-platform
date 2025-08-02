@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ problem.title }} - CodePlatform{% endblock %}
+
+{% block meta_description %}Solve {{ problem.title }} - {{ problem.get_difficulty_display }} level {{ problem.get_problem_type_display }} problem on CodePlatform.{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{% url 'problems:list' %}" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Problems
+        </a>
+    </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Problem Description -->
+            <div class="space-y-6">
+                <!-- Problem Header -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ problem.title }}</h1>
+                        {% if problem.difficulty == 'easy' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-circle mr-2 text-xs"></i>Easy
+                            </span>
+                        {% elif problem.difficulty == 'medium' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-circle mr-2 text-xs"></i>Medium
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                <i class="fas fa-circle mr-2 text-xs"></i>Hard
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 text-center mb-6">
+                        <div>
+                            <div class="text-lg font-semibold text-gray-900">{{ stats.total_submissions }}</div>
+                            <div class="text-sm text-gray-500">Submissions</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-semibold text-green-600">{{ stats.accepted_submissions }}</div>
+                            <div class="text-sm text-gray-500">Accepted</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-semibold text-blue-600">{{ stats.success_rate|floatformat:1 }}%</div>
+                            <div class="text-sm text-gray-500">Success Rate</div>
+                        </div>
+                    </div>
+                    
+                    <div class="prose max-w-none">
+                        {{ problem.description|linebreaks }}
+                    </div>
+                </div>
+
+                <!-- Input/Output Format -->
+                {% if problem.input_format or problem.output_format %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Format</h3>
+                    
+                    {% if problem.input_format %}
+                    <div class="mb-4">
+                        <h4 class="font-medium text-gray-900 mb-2">Input</h4>
+                        <div class="text-gray-700">{{ problem.input_format|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if problem.output_format %}
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Output</h4>
+                        <div class="text-gray-700">{{ problem.output_format|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Constraints -->
+                {% if problem.constraints %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Constraints</h3>
+                    <div class="text-gray-700">{{ problem.constraints|linebreaks }}</div>
+                    <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium">Time Limit:</span> {{ problem.time_limit }}s
+                        </div>
+                        <div>
+                            <span class="font-medium">Memory Limit:</span> {{ problem.memory_limit }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Sample Test Cases -->
+                {% if sample_test_cases %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Sample Test Cases</h3>
+                    
+                    {% for test_case in sample_test_cases %}
+                    <div class="mb-6 last:mb-0">
+                        <h4 class="font-medium text-gray-900 mb-2">Example {{ forloop.counter }}</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <div class="text-sm font-medium text-gray-700 mb-1">Input</div>
+                                <pre class="bg-gray-100 p-3 rounded text-sm overflow-x-auto"><code>{{ test_case.input_data }}</code></pre>
+                            </div>
+                            <div>
+                                <div class="text-sm font-medium text-gray-700 mb-1">Output</div>
+                                <pre class="bg-gray-100 p-3 rounded text-sm overflow-x-auto"><code>{{ test_case.expected_output }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Code Editor and Submission -->
+            <div class="space-y-6">
+                {% if user.is_authenticated %}
+                <!-- Code Editor -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Submit Solution</h3>
+                        <select id="languageSelect" class="rounded-md border-gray-300 text-sm">
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="c">C</option>
+                            <option value="javascript">JavaScript</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <textarea id="codeEditor" rows="20" class="w-full font-mono text-sm border rounded-md p-3" placeholder="Write your solution here..."></textarea>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <button id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium">
+                                <i class="fas fa-play mr-2"></i>Submit
+                            </button>
+                            <button id="testBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium">
+                                <i class="fas fa-vial mr-2"></i>Test
+                            </button>
+                            <button id="clearBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-medium">
+                                <i class="fas fa-trash mr-2"></i>Clear
+                            </button>
+                        </div>
+                        
+                        <a href="{% url 'learning_sessions:start_session' problem.id %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium text-sm">
+                            <i class="fas fa-graduation-cap mr-2"></i>Learning Session
+                        </a>
+                    </div>
+                    
+                    <div id="resultArea" class="hidden mt-4 p-4 rounded-md"></div>
+                </div>
+                {% else %}
+                <!-- Login Prompt -->
+                <div class="bg-white rounded-lg shadow p-6 text-center">
+                    <i class="fas fa-lock text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Login Required</h3>
+                    <p class="text-gray-600 mb-4">You need to log in to submit solutions.</p>
+                    <a href="/login/" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium">
+                        Login
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- My Submissions -->
+                {% if user.is_authenticated and user_submissions %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">My Submissions</h3>
+                    
+                    <div class="space-y-3">
+                        {% for submission in user_submissions %}
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                {% if submission.status == 'ACCEPTED' %}
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-green-800">Accepted</span>
+                                {% elif submission.status == 'WRONG_ANSWER' %}
+                                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-red-800">Wrong Answer</span>
+                                {% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}
+                                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-yellow-800">Time Limit Exceeded</span>
+                                {% elif submission.status == 'RUNTIME_ERROR' %}
+                                    <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-purple-800">Runtime Error</span>
+                                {% elif submission.status == 'COMPILATION_ERROR' %}
+                                    <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-orange-800">Compilation Error</span>
+                                {% else %}
+                                    <div class="w-3 h-3 bg-gray-500 rounded-full animate-pulse"></div>
+                                    <span class="text-sm font-medium text-gray-800">Pending</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="text-xs text-gray-500">
+                                {{ submission.created_at|timesince }} ago
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- CodeMirror Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+
+<script>
+        // Initialize CodeMirror
+        const editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+            lineNumbers: true,
+            mode: 'python',
+            theme: 'dracula',
+            indentUnit: 4,
+            lineWrapping: true
+        });
+
+        // Language templates
+        const templates = {
+            python: `def solution():
+    # Write your solution here
+    pass
+
+solution()`,
+            java: `public class Solution {
+    public static void main(String[] args) {
+        // Write your solution here
+    }
+}`,
+            cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    // Write your solution here
+    return 0;
+}`,
+            c: `#include <stdio.h>
+
+int main() {
+    // Write your solution here
+    return 0;
+}`,
+            javascript: `function solution() {
+    // Write your solution here
+}
+
+solution();`
+        };
+
+        // Language change handler
+        document.getElementById('languageSelect').addEventListener('change', function() {
+            const language = this.value;
+            let mode = language;
+            
+            if (language === 'cpp' || language === 'c' || language === 'java') {
+                mode = 'text/x-c++src';
+            } else if (language === 'javascript') {
+                mode = 'javascript';
+            }
+            
+            editor.setOption('mode', mode);
+            editor.setValue(templates[language] || '');
+        });
+
+        // Submit button handler
+        document.getElementById('submitBtn').addEventListener('click', async function() {
+            const code = editor.getValue().trim();
+            const language = document.getElementById('languageSelect').value;
+            const resultArea = document.getElementById('resultArea');
+            
+            if (!code) {
+                resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+                resultArea.innerHTML = '<p class="text-red-800">Please write some code before submitting.</p>';
+                resultArea.classList.remove('hidden');
+                return;
+            }
+            
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+            
+            try {
+                const response = await fetch('{% url "submit:submit_solution" problem.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        language: language
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.error) {
+                    let statusColor = 'green';
+                    let statusIcon = 'check';
+                    
+                    if (data.status === 'WRONG_ANSWER') {
+                        statusColor = 'red';
+                        statusIcon = 'times';
+                    } else if (data.status === 'TIME_LIMIT_EXCEEDED') {
+                        statusColor = 'yellow';
+                        statusIcon = 'clock';
+                    } else if (data.status === 'RUNTIME_ERROR' || data.status === 'COMPILATION_ERROR') {
+                        statusColor = 'orange';
+                        statusIcon = 'exclamation-triangle';
+                    }
+                    
+                    resultArea.className = `mt-4 p-4 rounded-md bg-${statusColor}-100 border border-${statusColor}-200`;
+                    resultArea.innerHTML = `
+                        <div class="text-${statusColor}-800">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-${statusIcon} mr-2"></i>
+                                <span class="font-semibold">${data.message}</span>
+                            </div>
+                            <div class="text-sm">
+                                <p>Test Cases: ${data.passed_tests}/${data.total_tests} passed</p>
+                                <p>Score: ${data.score.toFixed(1)}%</p>
+                                ${data.max_time ? `<p>Execution Time: ${data.max_time.toFixed(3)}s</p>` : ''}
+                            </div>
+                            <div class="mt-3">
+                                <a href="${data.redirect_url}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                    <i class="fas fa-eye mr-1"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Show success message
+                    CodePlatform.showToast('Submission processed successfully!', 'success');
+                } else {
+                    resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+                    resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>' + (data.error || 'Submission failed') + '</p>';
+                }
+                
+                resultArea.classList.remove('hidden');
+                
+            } catch (error) {
+                resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+                resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>Network error. Please try again.</p>';
+                resultArea.classList.remove('hidden');
+            }
+            
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-play mr-2"></i>Submit';
+        });
+
+        // Test button handler
+        document.getElementById('testBtn').addEventListener('click', function() {
+            const resultArea = document.getElementById('resultArea');
+            resultArea.className = 'mt-4 p-4 rounded-md bg-blue-100 border border-blue-200';
+            resultArea.innerHTML = '<p class="text-blue-800"><i class="fas fa-info-circle mr-2"></i>Test functionality coming soon!</p>';
+            resultArea.classList.remove('hidden');
+        });
+
+        // Clear button handler
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear the code?')) {
+                const language = document.getElementById('languageSelect').value;
+                editor.setValue(templates[language] || '');
+                document.getElementById('resultArea').classList.add('hidden');
+            }
+        });
+
+        // Initialize with Python template
+        editor.setValue(templates.python);
+</script>
+{% endblock %}

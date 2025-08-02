@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contests - CodePlatform{% endblock %}
+
+{% block meta_description %}Participate in coding contests on CodePlatform. Coming soon - timed challenges, ratings, and competitive programming.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                <i class="fas fa-trophy text-yellow-500 mr-3"></i>Contests
+            </h1>
+            <p class="mt-2 text-gray-600">Compete with others in timed coding challenges</p>
+        </div>
+
+        <!-- Coming Soon Banner -->
+        <div class="bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg shadow-lg p-8 text-center text-white mb-8">
+            <div class="max-w-3xl mx-auto">
+                <i class="fas fa-rocket text-6xl mb-6 opacity-80"></i>
+                <h2 class="text-3xl font-bold mb-4">Contests Coming Soon!</h2>
+                <p class="text-xl mb-6 opacity-90">
+                    We're working hard to bring you an amazing contest experience with real-time competitions, 
+                    ratings, and exciting prizes.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 text-sm">
+                    <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                        <i class="fas fa-clock mr-2"></i>Timed Contests
+                    </div>
+                    <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                        <i class="fas fa-star mr-2"></i>Rating System
+                    </div>
+                    <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                        <i class="fas fa-medal mr-2"></i>Leaderboards
+                    </div>
+                    <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                        <i class="fas fa-gift mr-2"></i>Prizes
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Preview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-stopwatch text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Timed Challenges</h3>
+                <p class="text-gray-600">Compete in real-time coding contests with strict time limits and live rankings.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-chart-line text-green-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Rating System</h3>
+                <p class="text-gray-600">Track your progress with an advanced ELO-based rating system similar to competitive platforms.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-users text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Live Leaderboard</h3>
+                <p class="text-gray-600">Watch your ranking change in real-time as you solve problems during contests.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-trophy text-yellow-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Weekly Contests</h3>
+                <p class="text-gray-600">Regular weekly contests with problems of varying difficulty levels.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-graduation-cap text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Educational Rounds</h3>
+                <p class="text-gray-600">Special educational contests with detailed editorials and learning resources.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-certificate text-indigo-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Achievements</h3>
+                <p class="text-gray-600">Earn badges and certificates for your contest participation and performance.</p>
+            </div>
+        </div>
+
+        <!-- Upcoming Features Timeline -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">Development Roadmap</h3>
+            
+            <div class="space-y-6">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="w-4 h-4 bg-blue-600 rounded-full mt-1"></div>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="text-sm font-semibold text-gray-900">Phase 1: Contest Infrastructure</h4>
+                        <p class="text-sm text-gray-600 mt-1">Setting up contest creation tools, timer systems, and submission handling.</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-2">
+                            In Progress
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="w-4 h-4 bg-gray-300 rounded-full mt-1"></div>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="text-sm font-semibold text-gray-900">Phase 2: Rating System</h4>
+                        <p class="text-sm text-gray-600 mt-1">Implementing competitive rating calculations and user rankings.</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mt-2">
+                            Planned
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="w-4 h-4 bg-gray-300 rounded-full mt-1"></div>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="text-sm font-semibold text-gray-900">Phase 3: Live Features</h4>
+                        <p class="text-sm text-gray-600 mt-1">Real-time leaderboards, live chat, and contest announcements.</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mt-2">
+                            Planned
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6 text-center">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Stay Tuned!</h3>
+            <p class="text-gray-600 mb-6">
+                In the meantime, practice your skills with our extensive problem set to be ready for when contests launch.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="/problems/" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    <i class="fas fa-puzzle-piece mr-2"></i>
+                    Practice Problems
+                </a>
+                <a href="/problems/leaderboard/" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    View Leaderboard
+                </a>
+            </div>
+        </div>
+</div>
+{% endblock %}

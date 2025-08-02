@@ -1,0 +1,472 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - CodePlatform Blog{% endblock %}
+
+{% block meta_description %}{% if post %}Edit your blog post{% else %}Create a new blog post{% endif %} on CodePlatform's community blog.{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-group label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.form-group .helptext {
+    @apply text-sm text-gray-500 mt-1;
+}
+
+.form-group .errorlist {
+    @apply text-sm text-red-600 mt-1 list-none;
+}
+
+.preview-content {
+    @apply prose prose-lg max-w-none;
+}
+
+.preview-content h1 {
+    @apply text-3xl font-bold text-gray-900 mb-4;
+}
+
+.preview-content h2 {
+    @apply text-2xl font-semibold text-gray-900 mb-3 mt-6;
+}
+
+.preview-content h3 {
+    @apply text-xl font-semibold text-gray-900 mb-2 mt-5;
+}
+
+.preview-content p {
+    @apply text-gray-700 mb-4 leading-relaxed;
+}
+
+.preview-content ul, .preview-content ol {
+    @apply mb-4 pl-6;
+}
+
+.preview-content li {
+    @apply mb-1;
+}
+
+.preview-content blockquote {
+    @apply border-l-4 border-blue-500 bg-blue-50 p-4 my-4 italic;
+}
+
+.preview-content code {
+    @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono;
+}
+
+.preview-content pre {
+    @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{% if post %}{% url 'blogs:detail' post.slug %}{% else %}{% url 'blogs:list' %}{% endif %}" 
+           class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>
+            {% if post %}Back to Post{% else %}Back to Blog{% endif %}
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+                
+                <!-- Tab Buttons -->
+                <div class="flex space-x-2">
+                    <button id="writeTab" 
+                            class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 bg-blue-600 text-white">
+                        <i class="fas fa-edit mr-2"></i>Write
+                    </button>
+                    <button id="previewTab" 
+                            class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200">
+                        <i class="fas fa-eye mr-2"></i>Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="p-6">
+            {% csrf_token %}
+            
+            <!-- Write Tab Content -->
+            <div id="writeContent" class="space-y-6">
+                <!-- Title Field -->
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.title.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <!-- Content Field -->
+                <div class="form-group">
+                    <label for="{{ form.content.id_for_label }}">{{ form.content.label }}</label>
+                    {{ form.content }}
+                    {% if form.content.help_text %}
+                        <p class="helptext">{{ form.content.help_text }}</p>
+                    {% endif %}
+                    {% if form.content.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.content.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    
+                    <!-- Markdown Help -->
+                    <div class="mt-2 p-3 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-blue-800 font-medium mb-2">
+                            <i class="fas fa-info-circle mr-1"></i>Markdown Formatting Tips:
+                        </p>
+                        <div class="text-xs text-blue-700 grid grid-cols-2 gap-2">
+                            <div>
+                                <code class="bg-blue-100 px-1 rounded"># Header 1</code> → <strong>Header 1</strong>
+                            </div>
+                            <div>
+                                <code class="bg-blue-100 px-1 rounded">**bold**</code> → <strong>bold</strong>
+                            </div>
+                            <div>
+                                <code class="bg-blue-100 px-1 rounded">*italic*</code> → <em>italic</em>
+                            </div>
+                            <div>
+                                <code class="bg-blue-100 px-1 rounded">`code`</code> → <code class="bg-gray-100 px-1 rounded">code</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Row: Excerpt and Featured Image -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label for="{{ form.excerpt.id_for_label }}">{{ form.excerpt.label }}</label>
+                        {{ form.excerpt }}
+                        {% if form.excerpt.help_text %}
+                            <p class="helptext">{{ form.excerpt.help_text }}</p>
+                        {% endif %}
+                        {% if form.excerpt.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.excerpt.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.featured_image.id_for_label }}">{{ form.featured_image.label }}</label>
+                        {{ form.featured_image }}
+                        {% if form.featured_image.help_text %}
+                            <p class="helptext">{{ form.featured_image.help_text }}</p>
+                        {% endif %}
+                        {% if form.featured_image.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.featured_image.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if post and post.featured_image %}
+                            <div class="mt-2">
+                                <img src="{{ post.featured_image.url }}" alt="Current image" class="w-32 h-20 object-cover rounded-lg">
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Row: Category and Tags -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.category.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.tags.id_for_label }}">{{ form.tags.label }}</label>
+                        {{ form.tags }}
+                        {% if form.tags.help_text %}
+                            <p class="helptext">{{ form.tags.help_text }}</p>
+                        {% endif %}
+                        {% if form.tags.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.tags.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Row: Status and Featured -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.status.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="flex items-center space-x-2 mt-8">
+                            {{ form.is_featured }}
+                            <label for="{{ form.is_featured.id_for_label }}" class="text-sm font-medium text-gray-700">
+                                {{ form.is_featured.label }}
+                            </label>
+                        </div>
+                        {% if form.is_featured.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.is_featured.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- SEO Section -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-search mr-2"></i>SEO Settings (Optional)
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label for="{{ form.meta_description.id_for_label }}">{{ form.meta_description.label }}</label>
+                            {{ form.meta_description }}
+                            {% if form.meta_description.help_text %}
+                                <p class="helptext">{{ form.meta_description.help_text }}</p>
+                            {% endif %}
+                            {% if form.meta_description.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.meta_description.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.meta_keywords.id_for_label }}">{{ form.meta_keywords.label }}</label>
+                            {{ form.meta_keywords }}
+                            {% if form.meta_keywords.help_text %}
+                                <p class="helptext">{{ form.meta_keywords.help_text }}</p>
+                            {% endif %}
+                            {% if form.meta_keywords.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.meta_keywords.errors %}
+                                        <li>{{ error }}</li>
+                                {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preview Tab Content -->
+            <div id="previewContent" class="hidden">
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <div class="mb-6">
+                        <h1 id="previewTitle" class="text-3xl font-bold text-gray-900 mb-2">Your Title Here</h1>
+                        <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                            <span class="flex items-center">
+                                <i class="fas fa-user mr-1"></i>{{ user.username }}
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-calendar mr-1"></i>Now
+                            </span>
+                            <span id="previewCategory" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Category
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div id="previewImage" class="hidden mb-6">
+                        <img class="w-full h-64 object-cover rounded-lg" alt="Featured image">
+                    </div>
+                    
+                    <div class="preview-content">
+                        <div id="previewContentText">
+                            Write your content to see the preview...
+                        </div>
+                    </div>
+                    
+                    <div id="previewTags" class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                <a href="{% if post %}{% url 'blogs:detail' post.slug %}{% else %}{% url 'blogs:list' %}{% endif %}" 
+                   class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+                
+                <div class="flex space-x-3">
+                    <button type="button" id="saveDraftBtn" class="btn-secondary">
+                        <i class="fas fa-save mr-2"></i>Save Draft
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-{% if post %}save{% else %}plus{% endif %} mr-2"></i>
+                        {% if post %}Update Post{% else %}Publish Post{% endif %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const writeTab = document.getElementById('writeTab');
+    const previewTab = document.getElementById('previewTab');
+    const writeContent = document.getElementById('writeContent');
+    const previewContent = document.getElementById('previewContent');
+    
+    const titleField = document.getElementById('{{ form.title.id_for_label }}');
+    const contentField = document.getElementById('{{ form.content.id_for_label }}');
+    const categoryField = document.getElementById('{{ form.category.id_for_label }}');
+    const tagsField = document.getElementById('{{ form.tags.id_for_label }}');
+    const featuredImageField = document.getElementById('{{ form.featured_image.id_for_label }}');
+    
+    // Tab switching
+    writeTab.addEventListener('click', function() {
+        showWriteTab();
+    });
+    
+    previewTab.addEventListener('click', function() {
+        updatePreview();
+        showPreviewTab();
+    });
+    
+    function showWriteTab() {
+        writeTab.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 bg-blue-600 text-white';
+        previewTab.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200';
+        writeContent.classList.remove('hidden');
+        previewContent.classList.add('hidden');
+    }
+    
+    function showPreviewTab() {
+        previewTab.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 bg-blue-600 text-white';
+        writeTab.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200';
+        previewContent.classList.remove('hidden');
+        writeContent.classList.add('hidden');
+    }
+    
+    function updatePreview() {
+        const title = titleField.value || 'Your Title Here';
+        const content = contentField.value || 'Write your content to see the preview...';
+        const tags = tagsField.value;
+        
+        // Update title
+        document.getElementById('previewTitle').textContent = title;
+        
+        // Update content (simple markdown parsing)
+        let htmlContent = content
+            .replace(/# (.*)/g, '<h1>$1</h1>')
+            .replace(/## (.*)/g, '<h2>$1</h2>')
+            .replace(/### (.*)/g, '<h3>$1</h3>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+        
+        if (htmlContent && htmlContent !== 'Write your content to see the preview...') {
+            htmlContent = '<p>' + htmlContent + '</p>';
+        }
+        
+        document.getElementById('previewContentText').innerHTML = htmlContent;
+        
+        // Update category
+        const selectedCategory = categoryField.options[categoryField.selectedIndex];
+        if (selectedCategory.value) {
+            document.getElementById('previewCategory').textContent = selectedCategory.text;
+            document.getElementById('previewCategory').style.display = 'inline-flex';
+        } else {
+            document.getElementById('previewCategory').style.display = 'none';
+        }
+        
+        // Update tags
+        const tagsContainer = document.querySelector('#previewTags .flex');
+        tagsContainer.innerHTML = '';
+        
+        if (tags) {
+            const tagList = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+            tagList.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800';
+                tagElement.textContent = '#' + tag;
+                tagsContainer.appendChild(tagElement);
+            });
+        }
+        
+        // Handle featured image preview
+        const previewImageDiv = document.getElementById('previewImage');
+        const previewImg = previewImageDiv.querySelector('img');
+        
+        if (featuredImageField.files && featuredImageField.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewImageDiv.classList.remove('hidden');
+            };
+            reader.readAsDataURL(featuredImageField.files[0]);
+        } else {
+            previewImageDiv.classList.add('hidden');
+        }
+    }
+    
+    // Save draft functionality
+    document.getElementById('saveDraftBtn').addEventListener('click', function() {
+        const statusField = document.getElementById('{{ form.status.id_for_label }}');
+        statusField.value = 'draft';
+        document.querySelector('form').submit();
+    });
+    
+    // Auto-save functionality (optional)
+    let autoSaveTimeout;
+    
+    function autoSave() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            const formData = new FormData(document.querySelector('form'));
+            formData.set('status', 'draft');
+            
+            // Here you could implement AJAX auto-save
+            console.log('Auto-save triggered (not implemented)');
+        }, 30000); // Auto-save every 30 seconds
+    }
+    
+    titleField.addEventListener('input', autoSave);
+    contentField.addEventListener('input', autoSave);
+});
+</script>
+{% endblock %}

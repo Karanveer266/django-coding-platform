@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Problems - CodePlatform{% endblock %}
+
+{% block meta_description %}Browse and solve coding problems on CodePlatform. Filter by difficulty and type to find the perfect challenge.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Problems</h1>
+            <p class="mt-2 text-gray-600">Challenge yourself with coding problems of varying difficulty.</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <form method="GET" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
+                <div class="flex-1">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input type="text" id="search" name="search" value="{{ current_search }}" 
+                           placeholder="Search problems..."
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label for="difficulty" class="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
+                    <select id="difficulty" name="difficulty" class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">All Difficulties</option>
+                        {% for value, label in difficulty_choices %}
+                            <option value="{{ value }}" {% if current_difficulty == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select id="type" name="type" class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">All Types</option>
+                        {% for value, label in type_choices %}
+                            <option value="{{ value }}" {% if current_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium">
+                        <i class="fas fa-search mr-2"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Problems List -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">
+                    Problems ({{ problems.paginator.count }} total)
+                </h3>
+            </div>
+            
+            {% if problems %}
+                <div class="divide-y divide-gray-200">
+                    {% for problem in problems %}
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-3">
+                                        {% if user.is_authenticated and problem.is_solved %}
+                                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-check text-white text-xs"></i>
+                                            </div>
+                                        {% else %}
+                                            <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                        {% endif %}
+                                        
+                                        <div>
+                                            <h4 class="text-lg font-medium text-gray-900">
+                                                <a href="{% url 'problems:detail' problem.id %}" class="hover:text-blue-600">
+                                                    {{ problem.title }}
+                                                </a>
+                                            </h4>
+                                            <p class="text-sm text-gray-500 mt-1">{{ problem.description|truncatewords:20 }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4">
+                                    <!-- Difficulty Badge -->
+                                    {% if problem.difficulty == 'easy' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            Easy
+                                        </span>
+                                    {% elif problem.difficulty == 'medium' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            Medium
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            Hard
+                                        </span>
+                                    {% endif %}
+                                    
+                                    <!-- Success Rate -->
+                                    <div class="text-sm text-gray-500">
+                                        <i class="fas fa-chart-bar mr-1"></i>
+                                        {{ problem.success_rate|floatformat:1 }}%
+                                    </div>
+                                    
+                                    <!-- Submissions Count -->
+                                    <div class="text-sm text-gray-500">
+                                        <i class="fas fa-users mr-1"></i>
+                                        {{ problem.total_attempts }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if problems.has_other_pages %}
+                    <div class="px-6 py-4 border-t border-gray-200">
+                        <nav class="flex items-center justify-between">
+                            <div class="flex-1 flex justify-between sm:hidden">
+                                {% if problems.has_previous %}
+                                    <a href="?page={{ problems.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}" 
+                                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                        Previous
+                                    </a>
+                                {% endif %}
+                                {% if problems.has_next %}
+                                    <a href="?page={{ problems.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}" 
+                                       class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                        Next
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-700">
+                                        Showing page <span class="font-medium">{{ problems.number }}</span> of <span class="font-medium">{{ problems.paginator.num_pages }}</span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                        {% if problems.has_previous %}
+                                            <a href="?page={{ problems.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}" 
+                                               class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        {% endif %}
+                                        
+                                        {% for num in problems.paginator.page_range %}
+                                            {% if num == problems.number %}
+                                                <span class="bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                                    {{ num }}
+                                                </span>
+                                            {% else %}
+                                                <a href="?page={{ num }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}" 
+                                                   class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                                    {{ num }}
+                                                </a>
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        {% if problems.has_next %}
+                                            <a href="?page={{ problems.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}" 
+                                               class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        {% endif %}
+                                    </nav>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="px-6 py-12 text-center">
+                    <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No problems found</h3>
+                    <p class="text-gray-500">Try adjusting your search filters.</p>
+                </div>
+            {% endif %}
+        </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+Django==5.2.3
+python-dotenv
+django-tailwind
+daphne
+channels
+channels-redis
+djangorestframework
+djangorestframework-simplejwt
+dj-rest-auth
+django-allauth
+celery
+redis
+docker
+requests
+psycopg2-binary
+Pillow

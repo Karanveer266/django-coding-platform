@@ -1,0 +1,290 @@
+/* Custom CSS for CodePlatform */
+
+/* Font Family */
+.font-inter {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Smooth Transitions */
+* {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* Code Editor Styles */
+.code-editor {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.code-editor textarea {
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    color: inherit;
+    font: inherit;
+    padding: 16px;
+    width: 100%;
+    height: 100%;
+}
+
+/* Syntax Highlighting */
+.token.comment { color: #64748b; }
+.token.keyword { color: #8b5cf6; }
+.token.string { color: #10b981; }
+.token.number { color: #f59e0b; }
+.token.function { color: #3b82f6; }
+.token.operator { color: #ef4444; }
+
+/* Problem Difficulty Badges */
+.difficulty-easy {
+    @apply bg-green-100 text-green-800 border-green-200;
+}
+
+.difficulty-medium {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+}
+
+.difficulty-hard {
+    @apply bg-red-100 text-red-800 border-red-200;
+}
+
+/* Status Badges */
+.status-accepted {
+    @apply bg-green-100 text-green-800 border-green-200;
+}
+
+.status-wrong-answer {
+    @apply bg-red-100 text-red-800 border-red-200;
+}
+
+.status-time-limit {
+    @apply bg-orange-100 text-orange-800 border-orange-200;
+}
+
+.status-runtime-error {
+    @apply bg-purple-100 text-purple-800 border-purple-200;
+}
+
+.status-pending {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+
+/* Custom Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Loading Spinner */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Card Hover Effects */
+.card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Progress Bar */
+.progress-bar {
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 9999px;
+    height: 8px;
+    transition: width 0.5s ease-in-out;
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Custom Button Styles */
+.btn-primary {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium py-2 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200;
+}
+
+.btn-secondary {
+    @apply bg-gray-100 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200;
+}
+
+.btn-success {
+    @apply bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200;
+}
+
+.btn-danger {
+    @apply bg-red-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200;
+}
+
+/* Form Styles */
+.form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+}
+
+.form-textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200;
+}
+
+.form-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-all duration-200;
+}
+
+/* Table Styles */
+.table-hover tbody tr:hover {
+    @apply bg-gray-50;
+}
+
+/* Toast Notifications */
+.toast {
+    @apply fixed bottom-4 right-4 max-w-sm bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50;
+    animation: slideIn 0.3s ease-out;
+}
+
+.toast.success {
+    @apply border-green-200 bg-green-50;
+}
+
+.toast.error {
+    @apply border-red-200 bg-red-50;
+}
+
+.toast.warning {
+    @apply border-yellow-200 bg-yellow-50;
+}
+
+.toast.info {
+    @apply border-blue-200 bg-blue-50;
+}
+
+/* Code Block Styles */
+pre[class*="language-"] {
+    @apply rounded-lg text-sm;
+    margin: 0;
+}
+
+code[class*="language-"] {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 640px) {
+    .mobile-hide {
+        display: none;
+    }
+    
+    .mobile-stack {
+        flex-direction: column;
+    }
+    
+    .mobile-full {
+        width: 100%;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        @apply bg-gray-900 text-gray-100;
+    }
+    
+    .dark-mode .bg-white {
+        @apply bg-gray-800;
+    }
+    
+    .dark-mode .text-gray-900 {
+        @apply text-gray-100;
+    }
+    
+    .dark-mode .text-gray-700 {
+        @apply text-gray-300;
+    }
+    
+    .dark-mode .text-gray-500 {
+        @apply text-gray-400;
+    }
+    
+    .dark-mode .border-gray-200 {
+        @apply border-gray-700;
+    }
+    
+    .dark-mode .border-gray-300 {
+        @apply border-gray-600;
+    }
+}
