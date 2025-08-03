@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  judge-python:
+    build:
+      context: ./docker/python
+      dockerfile: Dockerfile
+    image: django-judge-python
+    restart: "no"
+    networks:
+      - judge-network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=10m,noexec
+    mem_limit: 256m
+    memswap_limit: 256m
+    cpu_quota: 50000
+    cpu_period: 100000
+    pids_limit: 50
+    user: sandbox
+
+  judge-cpp:
+    build:
+      context: ./docker/cpp
+      dockerfile: Dockerfile
+    image: django-judge-cpp
+    restart: "no"
+    networks:
+      - judge-network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=10m,noexec
+    mem_limit: 128m
+    memswap_limit: 128m
+    cpu_quota: 50000
+    cpu_period: 100000
+    pids_limit: 50
+    user: sandbox
+
+  judge-java:
+    build:
+      context: ./docker/java
+      dockerfile: Dockerfile
+    image: django-judge-java
+    restart: "no"
+    networks:
+      - judge-network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=10m,noexec
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpu_quota: 50000
+    cpu_period: 100000
+    pids_limit: 50
+    user: sandbox
+
+  judge-javascript:
+    build:
+      context: ./docker/javascript
+      dockerfile: Dockerfile
+    image: django-judge-javascript
+    restart: "no"
+    networks:
+      - judge-network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=10m,noexec
+    mem_limit: 256m
+    memswap_limit: 256m
+    cpu_quota: 50000
+    cpu_period: 100000
+    pids_limit: 50
+    user: sandbox
+
+networks:
+  judge-network:
+    driver: bridge
+    internal: true  # No external network access

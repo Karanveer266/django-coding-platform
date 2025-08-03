@@ -82,11 +82,13 @@ def signup_view(request):
                 if User.objects.filter(username=username).exists():
                     errors['username'] = ['User with this username already exists.']
                 
-                if password1 != password2:
+                if password1 and password2 and password1 != password2:
                     errors['password1'] = ['Passwords do not match.']
                 
-                if len(password1) < 8:
-                    errors['password1'] = ['Password must be at least 8 characters long.']
+                if not password1 or len(password1) < 8:
+                    if 'password1' not in errors:
+                        errors['password1'] = []
+                    errors['password1'].append('Password must be at least 8 characters long.')
                 
                 if errors:
                     return JsonResponse({

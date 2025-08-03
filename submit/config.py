@@ -12,6 +12,21 @@ class JudgeConfig:
     DEFAULT_MEMORY_LIMIT = "128m"  # megabytes
     DEFAULT_COMPILE_TIMEOUT = 15  # seconds for compilation
     
+    # Security settings
+    ENABLE_SECURE_EXECUTION = True  # Prefer Docker-based execution
+    MAX_FILE_SIZE = "1m"  # Maximum code file size
+    MAX_OUTPUT_SIZE = "10m"  # Maximum output size
+    
+    # Blocked imports for security
+    BLOCKED_IMPORTS = [
+        'os', 'sys', 'subprocess', 'multiprocessing', 'threading',
+        'socket', 'urllib', 'requests', 'http', 'ftplib', 'telnetlib',
+        'smtplib', 'imaplib', 'poplib', 'ssl', 'hashlib', 'secrets',
+        'pickle', 'shelve', 'dbm', 'sqlite3', 'mysql', 'psycopg2',
+        'ctypes', 'cffi', '__import__', 'importlib', 'pkgutil',
+        'platform', 'glob', 'shutil', 'tempfile', 'zipfile', 'tarfile'
+    ]
+    
     # Language-specific overrides
     LANGUAGE_CONFIGS = {
         'python': {
@@ -99,3 +114,45 @@ class JudgeConfig:
         """Get list of supported programming languages"""
         default_languages = ['python', 'py', 'cpp', 'java', 'javascript']
         return getattr(settings, 'JUDGE_SUPPORTED_LANGUAGES', default_languages)
+    
+    @classmethod
+    def is_secure_execution_enabled(cls):
+        """Check if secure Docker-based execution is enabled"""
+        return getattr(settings, 'JUDGE_SECURE_EXECUTION', cls.ENABLE_SECURE_EXECUTION)
+    
+    @classmethod
+    def get_max_file_size(cls):
+        """Get maximum allowed file size for user code"""
+        return getattr(settings, 'JUDGE_MAX_FILE_SIZE', cls.MAX_FILE_SIZE)
+    
+    @classmethod
+    def get_max_output_size(cls):
+        """Get maximum allowed output size"""
+        return getattr(settings, 'JUDGE_MAX_OUTPUT_SIZE', cls.MAX_OUTPUT_SIZE)
+    
+    @classmethod
+    def validate_code_security(cls, code: str, language: str) -> tuple[bool, str]:
+        """Basic security validation of user code"""
+        if len(code.encode('utf-8')) > cls.memory_limit_to_bytes(cls.get_max_file_size()):
+            return False, "Code file too large"
+        
+        # Check for dangerous imports (basic check)
+        if language.lower() in ['python', 'py']:
+            code_lower = code.lower()
+            for blocked in cls.BLOCKED_IMPORTS:
+                if f'import {blocked}' in code_lower or f'from {blocked}' in code_lower:
+                    return False, f"Potentially dangerous import detected: {blocked}"
+        
+        # Check for system command patterns
+        dangerous_patterns = [
+            'system(', 'exec(', 'eval(', 'subprocess', 'popen(',
+            'Runtime.getRuntime()', 'ProcessBuilder', 'os.system',
+            'require("child_process")', 'require("fs")', 'require("os")',
+        ]
+        
+        code_lower = code.lower()
+        for pattern in dangerous_patterns:
+            if pattern.lower() in code_lower:
+                return False, f"Potentially dangerous code pattern detected: {pattern}"
+        
+        return True, "Code validation passed"

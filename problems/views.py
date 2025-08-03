@@ -120,7 +120,7 @@ def submit_solution(request, problem_id):
                     
                     if test_cases.exists():
                         # Judge the submission
-                        judge_result = judge.judge_submission(code, language, test_cases)
+                        judge_result = judge.judge_submission(code, language, test_cases, problem)
                         
                         # Update submission with results
                         submission.status = judge_result['status']
@@ -132,9 +132,10 @@ def submit_solution(request, problem_id):
                         
                         # Save individual test case results
                         for test_result in judge_result['test_results']:
+                            test_case = TestCase.objects.get(id=test_result['test_case_id'])
                             TestCaseResult.objects.create(
                                 submission=submission,
-                                test_case_id=test_result['test_case_id'],
+                                test_case=test_case,
                                 status=test_result['status'],
                                 execution_time=test_result['execution_time'],
                                 actual_output=test_result['actual_output'],
@@ -226,13 +227,9 @@ def leaderboard_view(request):
 
 def contest_list(request):
     """Display list of contests"""
-    # Placeholder for future contest functionality
-    context = {
-        'contests': [],
-        'message': 'Contests feature coming soon!'
-    }
-    
-    return render(request, 'problems/contest_list.html', context)
+    # Contests functionality is disabled
+    messages.info(request, 'Contests feature is currently disabled.')
+    return redirect('problems:list')
 
 def problem_stats(request, problem_id):
     """Get problem statistics via AJAX"""

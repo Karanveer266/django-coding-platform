@@ -33,6 +33,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("submit/", include("submit.urls")),
     path("learning-sessions/", include("learning_sessions.urls")),
+    path("ai-code-review/", include("ai_code_review.urls")),
 
     # ──────────────────────────────────────────
     # 3)  API  (dj-rest-auth / DRF) - Commented out for now

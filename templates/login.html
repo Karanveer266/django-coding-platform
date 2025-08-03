@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FIXED LOGIN PAGE - 2025-08-02</title>
+  <title>Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gray-100">
 
   <div class="w-full max-w-md bg-white rounded shadow p-8">
-    <h1 class="text-2xl font-bold text-center mb-6">FIXED LOGIN - NO CACHE</h1>
-    <p class="text-center text-sm text-red-600 mb-4">TIMESTAMP: 2025-08-02 - VERSION 3</p>
+    <h1 class="text-2xl font-bold text-center mb-6">Login</h1>
 
     <form id="loginForm" class="space-y-4">
       {% csrf_token %}
@@ -33,7 +32,7 @@
 
       <button type="submit"
               class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">
-        FIXED LOGIN BUTTON
+        Login
       </button>
     </form>
 
@@ -48,8 +47,6 @@
   </div>
 
 <script>
-console.log('=== FIXED LOGIN TEMPLATE LOADED - 2025-08-02 ===');
-alert('FIXED TEMPLATE LOADED!');
 
 function getCookie(name) {
   let cookieValue = null;
@@ -87,8 +84,6 @@ form.addEventListener('submit', async (e) => {
   if (username) payload.username = username;
   if (email) payload.email = email;
 
-  console.log('=== SENDING TO CORRECT URL: /login/ ===');
-  console.log('Payload:', payload);
 
   try {
     const response = await fetch('/login/', {
@@ -100,7 +95,6 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify(payload),
     });
 
-    console.log('Response status:', response.status);
     const data = await response.json();
 
     if (!response.ok) {

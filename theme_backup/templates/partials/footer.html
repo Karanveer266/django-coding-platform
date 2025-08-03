@@ -1,9 +1,9 @@
 <!-- Footer -->
 <footer class="bg-white border-t border-gray-200 mt-auto">
     <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Company Info -->
-            <div class="col-span-1 lg:col-span-2">
+            <div class="col-span-1">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mr-3">
                         <i class="fas fa-code text-white text-sm"></i>
@@ -16,20 +16,6 @@
                     Master your coding skills with our comprehensive platform. Practice problems, 
                     participate in contests, and learn from our extensive blog resources.
                 </p>
-                <div class="flex space-x-4">
-                    <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors duration-200">
-                        <i class="fab fa-github text-xl"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors duration-200">
-                        <i class="fab fa-twitter text-xl"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors duration-200">
-                        <i class="fab fa-linkedin text-xl"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors duration-200">
-                        <i class="fab fa-discord text-xl"></i>
-                    </a>
-                </div>
             </div>
             
             <!-- Quick Links -->
@@ -49,11 +35,6 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'problems:contests' %}" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                            <i class="fas fa-trophy mr-2 text-sm"></i>Contests
-                        </a>
-                    </li>
-                    <li>
                         <a href="{% url 'problems:leaderboard' %}" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">
                             <i class="fas fa-chart-line mr-2 text-sm"></i>Leaderboard
                         </a>
@@ -66,59 +47,15 @@
                 </ul>
             </div>
             
-            <!-- Resources -->
-            <div>
-                <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
-                    Resources
-                </h3>
-                <ul class="space-y-3">
-                    <li>
-                        <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                            <i class="fas fa-book mr-2 text-sm"></i>Documentation
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                            <i class="fas fa-question-circle mr-2 text-sm"></i>Help Center
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                            <i class="fas fa-users mr-2 text-sm"></i>Community
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                            <i class="fas fa-keyboard mr-2 text-sm"></i>Tutorials
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                            <i class="fas fa-code-branch mr-2 text-sm"></i>API
-                        </a>
-                    </li>
-                </ul>
-            </div>
         </div>
         
         <!-- Bottom Section -->
         <div class="mt-8 pt-8 border-t border-gray-200">
-            <div class="flex flex-col sm:flex-row justify-between items-center">
+            <div class="flex flex-col sm:flex-row justify-center items-center">
                 <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6">
                     <p class="text-gray-500 text-sm">
                         © {% now "Y" %} CodePlatform. All rights reserved.
                     </p>
-                    <div class="flex space-x-6">
-                        <a href="#" class="text-gray-500 hover:text-blue-600 text-sm transition-colors duration-200">
-                            Privacy Policy
-                        </a>
-                        <a href="#" class="text-gray-500 hover:text-blue-600 text-sm transition-colors duration-200">
-                            Terms of Service
-                        </a>
-                        <a href="#" class="text-gray-500 hover:text-blue-600 text-sm transition-colors duration-200">
-                            Contact
-                        </a>
-                    </div>
                 </div>
                 
                 <!-- Status Indicator -->

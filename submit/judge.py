@@ -7,15 +7,27 @@ import shutil
 from typing import Tuple, Optional, Dict
 import logging
 from .config import JudgeConfig
+from .secure_executor import SecureExecutor
 
 logger = logging.getLogger(__name__)
 
 class CodeJudge:
-    """Enhanced code judge supporting multiple languages with dynamic configuration"""
+    """Enhanced code judge supporting multiple languages with secure containerized execution"""
     
     def __init__(self):
         # These will be set dynamically per submission
         self.config = JudgeConfig()
+        
+        # Initialize secure executor (Docker-based)
+        try:
+            self.secure_executor = SecureExecutor()
+            self.use_secure_execution = True
+            logger.info("Secure Docker-based execution initialized")
+        except Exception as e:
+            logger.warning(f"Failed to initialize secure executor: {e}")
+            logger.warning("Falling back to legacy execution (UNSAFE)")
+            self.secure_executor = None
+            self.use_secure_execution = False
         
         # Language configurations
         self.language_configs = {
@@ -58,25 +70,30 @@ class CodeJudge:
         }
         
     def check_system_requirements(self) -> Dict[str, bool]:
-        """Check if required compilers/interpreters are available"""
-        requirements = {}
-        
-        # Check Python
-        requirements['python'] = shutil.which('python3') is not None or shutil.which('python') is not None
-        
-        # Check C++
-        requirements['cpp'] = shutil.which('g++') is not None
-        
-        # Check C
-        requirements['c'] = shutil.which('gcc') is not None
-        
-        # Check Java
-        requirements['java'] = shutil.which('javac') is not None and shutil.which('java') is not None
-        
-        # Check Node.js
-        requirements['javascript'] = shutil.which('node') is not None
-        
-        return requirements
+        """Check if required execution environment is available"""
+        if self.use_secure_execution and self.secure_executor:
+            # Check Docker-based requirements
+            return self.secure_executor.check_docker_status()
+        else:
+            # Legacy system requirements check
+            requirements = {}
+            
+            # Check Python
+            requirements['python'] = shutil.which('python3') is not None or shutil.which('python') is not None
+            
+            # Check C++
+            requirements['cpp'] = shutil.which('g++') is not None
+            
+            # Check C
+            requirements['c'] = shutil.which('gcc') is not None
+            
+            # Check Java
+            requirements['java'] = shutil.which('javac') is not None and shutil.which('java') is not None
+            
+            # Check Node.js
+            requirements['javascript'] = shutil.which('node') is not None
+            
+            return requirements
         
     def execute_python(self, code: str, input_data: str, timeout: int = None) -> Tuple[str, str, float, bool]:
         """Execute Python code with input and return output, error, time, success"""
@@ -258,9 +275,19 @@ class CodeJudge:
             return "", str(e), 0, False
             
     def execute_code(self, code: str, language: str, input_data: str, timeout: int = None) -> Tuple[str, str, float, bool]:
-        """Execute code in the specified language"""
+        """Execute code in the specified language using secure containerized execution"""
         language = language.lower()
         
+        # Use secure Docker-based execution if available
+        if self.use_secure_execution and self.secure_executor:
+            try:
+                return self.secure_executor.execute_code(code, language, input_data, timeout)
+            except Exception as e:
+                logger.error(f"Secure execution failed: {e}")
+                logger.warning("Falling back to legacy execution (UNSAFE)")
+        
+        # Legacy execution (UNSAFE - only for development/testing)
+        logger.warning("Using UNSAFE legacy execution - not recommended for production")
         if language in ['python', 'py']:
             return self.execute_python(code, input_data, timeout)
         elif language in ['cpp', 'c++']:
@@ -271,7 +298,19 @@ class CodeJudge:
             return "", f"Language '{language}' not supported", 0, False
     
     def judge_submission(self, code: str, language: str, test_cases: list, problem=None) -> dict:
-        """Judge a submission against test cases with dynamic configuration"""
+        """Judge a submission against test cases with security validation"""
+        # First validate code security
+        is_valid, validation_message = self.config.validate_code_security(code, language)
+        if not is_valid:
+            return {
+                'status': 'SECURITY_VIOLATION',
+                'passed_tests': 0,
+                'total_tests': len(test_cases),
+                'max_time': 0,
+                'test_results': [],
+                'compilation_error': f"Security validation failed: {validation_message}"
+            }
+        
         results = {
             'status': 'ACCEPTED',
             'passed_tests': 0,
