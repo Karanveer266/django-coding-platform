@@ -41,7 +41,7 @@
             </h1>
             <div class="flex items-center space-x-3">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border
-                    {% if submission.status == 'ACCEPTED' %}status-accepted{% elif submission.status == 'WRONG_ANSWER' %}status-wrong-answer{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}status-time-limit{% elif submission.status == 'RUNTIME_ERROR' %}bg-purple-100 text-purple-800 border-purple-200{% elif submission.status == 'COMPILATION_ERROR' %}bg-orange-100 text-orange-800 border-orange-200{% else %}status-pending{% endif %}">
+                    {% if submission.status == 'ACCEPTED' %}status-accepted{% elif submission.status == 'WRONG_ANSWER' %}status-wrong-answer{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}status-time-limit{% elif submission.status == 'MEMORY_LIMIT_EXCEEDED' %}status-memory-limit{% elif submission.status == 'COMPILATION_ERROR' %}status-compilation-error{% elif submission.status == 'RUNTIME_ERROR' %}status-runtime-error{% elif submission.status == 'PENDING' or submission.status == 'JUDGING' %}status-pending{% else %}status-error{% endif %}">
                     {% if submission.status == 'ACCEPTED' %}
                         <i class="fas fa-check mr-2"></i>
                     {% elif submission.status == 'WRONG_ANSWER' %}

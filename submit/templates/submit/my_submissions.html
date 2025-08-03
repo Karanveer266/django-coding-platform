@@ -86,7 +86,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                                        {% if submission.status == 'ACCEPTED' %}status-accepted{% elif submission.status == 'WRONG_ANSWER' %}status-wrong-answer{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}status-time-limit{% elif submission.status == 'COMPILATION_ERROR' %}status-compilation-error{% elif submission.status == 'RUNTIME_ERROR' %}status-runtime-error{% else %}status-pending{% endif %}">
+                                        {% if submission.status == 'ACCEPTED' %}status-accepted{% elif submission.status == 'WRONG_ANSWER' %}status-wrong-answer{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}status-time-limit{% elif submission.status == 'MEMORY_LIMIT_EXCEEDED' %}status-memory-limit{% elif submission.status == 'COMPILATION_ERROR' %}status-compilation-error{% elif submission.status == 'RUNTIME_ERROR' %}status-runtime-error{% elif submission.status == 'PENDING' or submission.status == 'JUDGING' %}status-pending{% else %}status-error{% endif %}">
                                         {{ submission.get_status_display }}
                                     </span>
                                 </td>
@@ -164,8 +164,9 @@ function clearFilters() {
 
 // Auto-refresh pending submissions
 setInterval(() => {
-    const pendingRows = document.querySelectorAll('tr:has(.status-pending)');
-    if (pendingRows.length > 0) {
+    // Find all status elements with the pending class
+    const pendingStatuses = document.querySelectorAll('.status-pending');
+    if (pendingStatuses.length > 0) {
         location.reload();
     }
 }, 5000);

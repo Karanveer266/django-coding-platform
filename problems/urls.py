@@ -9,6 +9,6 @@ urlpatterns = [
     path('<int:problem_id>/submit/', views.submit_solution, name='submit'),
     path('<int:problem_id>/stats/', views.problem_stats, name='stats'),
     path('submission/<int:submission_id>/', views.submission_detail, name='submission_detail'),
-    path('leaderboard/', views.leaderboard, name='leaderboard'),
+    path('leaderboard/', views.leaderboard_view, name='leaderboard'), # Added leaderboard URL
     path('contests/', views.contest_list, name='contests'),
 ]

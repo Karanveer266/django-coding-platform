@@ -338,4 +338,24 @@ try:
     judge = CodeJudge()
 except Exception as e:
     logger.error(f"Failed to initialize judge: {e}")
-    judge = None
+    
+    # Create a fallback judge that returns error for all submissions
+    class FallbackJudge:
+        def judge_submission(self, code, language, test_cases, problem=None):
+            logger.error("Using fallback judge because main judge failed to initialize")
+            return {
+                'status': 'ERROR',
+                'total_tests': len(test_cases),
+                'passed_tests': 0,
+                'max_time': 0,
+                'compilation_error': 'Judge system is currently unavailable. Please try again later.',
+                'test_results': [{
+                    'test_case_id': tc.id,
+                    'status': 'ERROR',
+                    'execution_time': 0,
+                    'actual_output': '',
+                    'error': 'Judge system is currently unavailable'
+                } for tc in test_cases]
+            }
+    
+    judge = FallbackJudge()

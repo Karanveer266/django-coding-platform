@@ -113,7 +113,7 @@
                                             {{ submission.problem.get_difficulty_display }}
                                         </span>
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                                            {% if submission.status == 'ACCEPTED' %}status-accepted{% elif submission.status == 'WRONG_ANSWER' %}status-wrong-answer{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}status-time-limit{% else %}status-pending{% endif %}">
+                                            {% if submission.status == 'ACCEPTED' %}status-accepted{% elif submission.status == 'WRONG_ANSWER' %}status-wrong-answer{% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}status-time-limit{% elif submission.status == 'MEMORY_LIMIT_EXCEEDED' %}status-memory-limit{% elif submission.status == 'COMPILATION_ERROR' %}status-compilation-error{% elif submission.status == 'RUNTIME_ERROR' %}status-runtime-error{% elif submission.status == 'PENDING' or submission.status == 'JUDGING' %}status-pending{% else %}status-error{% endif %}">
                                             {{ submission.get_status_display }}
                                         </span>
                                     </div>
