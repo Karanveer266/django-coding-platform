@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Learning Session: {{ session.problem.title }} - CodePlatform{% endblock %}
+{% block title %}Learning Session: {{ session.problem.title }} - MyCodePlatform{% endblock %}
 
 {% block meta_description %}Interactive learning session for {{ session.problem.title }} with MCQs to reinforce problem-solving concepts.{% endblock %}
 
@@ -221,7 +221,7 @@ function initializeMCQForm() {
         
         const selectedAnswer = document.querySelector('input[name="answer"]:checked');
         if (!selectedAnswer) {
-            CodePlatform.showToast('Please select an answer', 'warning');
+            MyCodePlatform.showToast('Please select an answer', 'warning');
             return;
         }
         
@@ -251,7 +251,7 @@ function initializeMCQForm() {
             const data = await response.json();
             
             if (data.error) {
-                CodePlatform.showToast(data.error, 'error');
+                MyCodePlatform.showToast(data.error, 'error');
                 // Re-enable form
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Submit Answer';
@@ -265,7 +265,7 @@ function initializeMCQForm() {
             
         } catch (error) {
             console.error('Error submitting answer:', error);
-            CodePlatform.showToast('Network error. Please try again.', 'error');
+            MyCodePlatform.showToast('Network error. Please try again.', 'error');
             // Re-enable form
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Submit Answer';

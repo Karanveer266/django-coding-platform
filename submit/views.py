@@ -267,13 +267,27 @@ def test_code(request, problem_id):
             try:
                 judge_results = judge.judge_submission(code, language, sample_test_cases, problem)
                 
+                # Format test results for frontend
+                formatted_results = []
+                for result in judge_results['test_results']:
+                    # Get the test case for input/expected output
+                    test_case = next((tc for tc in sample_test_cases if tc.id == result['test_case_id']), None)
+                    formatted_results.append({
+                        'status': result['status'],
+                        'input_data': test_case.input_data if test_case else '',
+                        'expected_output': test_case.expected_output if test_case else '',
+                        'actual_output': result['actual_output'],
+                        'error': result.get('error', ''),
+                        'execution_time': result.get('execution_time', 0)
+                    })
+                
                 return JsonResponse({
                     'test_type': 'sample_cases',
                     'status': judge_results['status'],
                     'passed_tests': judge_results['passed_tests'],
                     'total_tests': judge_results['total_tests'],
                     'max_time': judge_results['max_time'],
-                    'test_results': judge_results['test_results'],
+                    'test_results': formatted_results,
                     'compilation_error': judge_results.get('compilation_error')
                 })
                 

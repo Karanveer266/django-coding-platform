@@ -45,6 +45,6 @@ class UserAdmin(BaseUserAdmin):
         return super().get_queryset(request).select_related()
 
 # Customize admin site header
-admin.site.site_header = "CodePlatform Administration"
-admin.site.site_title = "CodePlatform Admin"
-admin.site.index_title = "Welcome to CodePlatform Administration"
+admin.site.site_header = "MyCodePlatform Administration"
+admin.site.site_title = "MyCodePlatform Admin"
+admin.site.index_title = "Welcome to MyCodePlatform Administration"

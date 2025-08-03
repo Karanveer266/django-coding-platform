@@ -203,7 +203,7 @@ INTERNAL_IPS = [
 # OpenRouter Configuration (instead of OpenAI)
 OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
 OPENROUTER_SITE_URL = os.getenv('OPENROUTER_SITE_URL', 'http://localhost:8000')
-OPENROUTER_SITE_NAME = os.getenv('OPENROUTER_SITE_NAME', 'EdPlatform')
+OPENROUTER_SITE_NAME = os.getenv('OPENROUTER_SITE_NAME', 'MyCodePlatform')
 
 # Code Judge Configuration
 JUDGE_DEFAULT_TIME_LIMIT = int(os.getenv('JUDGE_DEFAULT_TIME_LIMIT', 5))  # seconds

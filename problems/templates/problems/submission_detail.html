@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Submission #{{ submission.id }} - CodePlatform{% endblock %}
+{% block title %}Submission #{{ submission.id }} - MyCodePlatform{% endblock %}
 
 {% block meta_description %}View detailed results for submission #{{ submission.id }} of {{ submission.problem.title }}.{% endblock %}
 
@@ -208,9 +208,9 @@
 function copyCode() {
     const code = `{{ submission.code|escapejs }}`;
     navigator.clipboard.writeText(code).then(() => {
-        CodePlatform.showToast('Code copied to clipboard!', 'success');
+        MyCodePlatform.showToast('Code copied to clipboard!', 'success');
     }).catch(() => {
-        CodePlatform.showToast('Failed to copy code', 'error');
+        MyCodePlatform.showToast('Failed to copy code', 'error');
     });
 }
 </script>

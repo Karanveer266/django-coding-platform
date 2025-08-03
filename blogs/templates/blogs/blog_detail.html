@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load blog_filters %}
 
-{% block title %}{{ post.title }} - CodePlatform Blog{% endblock %}
+{% block title %}{{ post.title }} - MyCodePlatform Blog{% endblock %}
 
 {% block meta_description %}{{ post.meta_description|default:post.excerpt|default:post.content|truncatewords:25 }}{% endblock %}
 
@@ -102,8 +103,8 @@
             </div>
             
             <!-- Content -->
-            <div class="prose prose-lg max-w-none">
-                {{ post.content|linebreaks }}
+            <div class="prose prose-lg max-w-none blog-content">
+                {{ post.content|linebreaks_with_code }}
             </div>
             
             <!-- Tags -->
@@ -173,6 +174,13 @@
                          class="w-10 h-10 rounded-full flex-shrink-0">
                     <div class="flex-1">
                         {{ comment_form.content }}
+                        {% if comment_form.content.errors %}
+                            <div class="mt-2 text-red-600 text-sm">
+                                {% for error in comment_form.content.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                         <div class="mt-3 flex items-center justify-between">
                             <p class="text-sm text-gray-500">
                                 Share your thoughts and engage with the community.
@@ -292,11 +300,118 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+/* Expandable code blocks */
+.code-block-container {
+    position: relative;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.code-block {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.code-block.collapsed {
+    max-height: 200px;
+    position: relative;
+}
+
+.code-block.collapsed::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: linear-gradient(to bottom, rgba(31, 41, 55, 0), rgba(31, 41, 55, 0.8), rgba(31, 41, 55, 1));
+    pointer-events: none;
+}
+
+.code-block.expanded {
+    max-height: none;
+}
+
+.expand-btn {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.expand-btn:hover {
+    background-color: #2563eb;
+}
+
+.code-header {
+    background-color: #374151;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    color: #d1d5db;
+    border-bottom: 1px solid #4b5563;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.copy-btn {
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.copy-btn:hover {
+    background-color: #4b5563;
+}
+
+/* Inline code styling */
+.inline-code {
+    background-color: #f3f4f6;
+    color: #1f2937;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875em;
+    border: 1px solid #e5e7eb;
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <!-- Replace the toggleReplyForm function at the bottom of the file -->
 <script>
-// Like functionality
+// Initialize expandable code blocks and like functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize expandable code blocks
+    initializeCodeBlocks();
+    
     const likeForm = document.querySelector('.like-form');
     if (likeForm) {
         likeForm.addEventListener('submit', async function(e) {
@@ -378,16 +493,19 @@ function toggleReplyForm(commentId) {
     replyContainer.id = `reply-form-${commentId}`;
     replyContainer.className = 'mt-4 ml-14';
     
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
     // Create the reply form
     replyContainer.innerHTML = `
         <form method="post" class="space-y-3">
-            {% csrf_token %}
+            <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
             <input type="hidden" name="parent_id" value="${commentId}">
             <textarea name="content" rows="3" 
                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Write your reply here..."></textarea>
-            <div class="flex justify-end">
-                <button type="button" onclick="toggleReplyForm(${commentId})" class="mr-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                      placeholder="Write your reply here..." required></textarea>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="toggleReplyForm(${commentId})" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
                     Cancel
                 </button>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
@@ -399,6 +517,156 @@ function toggleReplyForm(commentId) {
     
     // Insert the form after the comment
     commentContainer.appendChild(replyContainer);
+    
+    // Focus on the textarea
+    const textarea = replyContainer.querySelector('textarea');
+    textarea.focus();
+}
+
+// Initialize expandable code blocks (now handled by template filter)
+function initializeCodeBlocks() {
+    // First, handle code blocks created by the template filter
+    const existingCodeBlocks = document.querySelectorAll('.code-block-container');
+    
+    existingCodeBlocks.forEach(function(container) {
+        const codeBlock = container.querySelector('.code-block');
+        const expandBtn = container.querySelector('.expand-btn');
+        
+        if (codeBlock && expandBtn) {
+            // Get the code block ID
+            const codeId = codeBlock.id.replace('code-block-', '');
+            
+            // Check if we have a saved state in localStorage
+            const savedState = localStorage.getItem(`code-block-${codeId}-state`);
+            
+            if (savedState === 'expanded') {
+                codeBlock.classList.remove('collapsed');
+                codeBlock.classList.add('expanded');
+                expandBtn.innerHTML = '<i class="fas fa-compress-arrows-alt"></i> Collapse';
+            } else if (savedState === 'collapsed') {
+                codeBlock.classList.remove('expanded');
+                codeBlock.classList.add('collapsed');
+                expandBtn.innerHTML = '<i class="fas fa-expand-arrows-alt"></i> Expand';
+            } else {
+                // Default state is collapsed
+                localStorage.setItem(`code-block-${codeId}-state`, 'collapsed');
+            }
+        }
+    });
+    
+    // Then handle any remaining unprocessed code blocks
+    const codeElements = document.querySelectorAll('pre:not(.processed)');
+    
+    codeElements.forEach(function(element, index) {
+        // Skip if already processed
+        if (element.closest('.code-block-container')) {
+            return;
+        }
+        
+        // Get the code content
+        let codeContent = element.textContent || element.innerText;
+        
+        // Create container for the code block
+        const container = document.createElement('div');
+        container.className = 'code-block-container';
+        
+        // Create header
+        const header = document.createElement('div');
+        header.className = 'code-header';
+        
+        header.innerHTML = `
+            <span>CODE</span>
+            <button class="copy-btn" onclick="copyCodeToClipboard('fallback-${index}')">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        `;
+        
+        // Create code block
+        const codeBlock = document.createElement('div');
+        codeBlock.className = 'code-block collapsed';
+        codeBlock.id = `code-block-fallback-${index}`;
+        codeBlock.innerHTML = element.outerHTML;
+        
+        // Create expand button
+        const expandBtn = document.createElement('button');
+        expandBtn.className = 'expand-btn';
+        expandBtn.innerHTML = '<i class="fas fa-expand-arrows-alt"></i> Expand';
+        expandBtn.onclick = function() { toggleCodeBlock(`fallback-${index}`); };
+        
+        // Assemble the container
+        container.appendChild(header);
+        container.appendChild(codeBlock);
+        container.appendChild(expandBtn);
+        
+        // Replace the original element
+        element.parentNode.replaceChild(container, element);
+        element.classList.add('processed');
+    });
+}
+
+// Toggle code block expansion
+function toggleCodeBlock(index) {
+    const codeBlock = document.getElementById(`code-block-${index}`);
+    if (!codeBlock) return;
+    
+    const button = codeBlock.parentElement.querySelector('.expand-btn');
+    
+    if (codeBlock.classList.contains('collapsed')) {
+        codeBlock.classList.remove('collapsed');
+        codeBlock.classList.add('expanded');
+        button.innerHTML = '<i class="fas fa-compress-arrows-alt"></i> Collapse';
+        // Save state to localStorage
+        localStorage.setItem(`code-block-${index}-state`, 'expanded');
+    } else {
+        codeBlock.classList.remove('expanded');
+        codeBlock.classList.add('collapsed');
+        button.innerHTML = '<i class="fas fa-expand-arrows-alt"></i> Expand';
+        // Save state to localStorage
+        localStorage.setItem(`code-block-${index}-state`, 'collapsed');
+    }
+    
+    // Force a reflow to ensure the transition takes effect
+    codeBlock.offsetHeight;
+}
+
+// Copy code to clipboard
+function copyCodeToClipboard(index) {
+    const codeBlock = document.getElementById(`code-block-${index}`);
+    if (!codeBlock) return;
+    
+    const codeText = codeBlock.textContent || codeBlock.innerText;
+    
+    navigator.clipboard.writeText(codeText).then(function() {
+        // Create a toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        toast.textContent = 'Code copied to clipboard!';
+        document.body.appendChild(toast);
+        
+        // Remove toast after 3 seconds
+        setTimeout(function() {
+            toast.remove();
+        }, 3000);
+    }).catch(function(err) {
+        console.error('Failed to copy code: ', err);
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = codeText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        // Show toast
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        toast.textContent = 'Code copied to clipboard!';
+        document.body.appendChild(toast);
+        
+        setTimeout(function() {
+            toast.remove();
+        }, 3000);
+    });
 }
 </script>
 {% endblock %}

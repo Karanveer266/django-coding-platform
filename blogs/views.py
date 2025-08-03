@@ -102,6 +102,9 @@ def blog_detail(request, slug):
             comment.save()
             messages.success(request, 'Your comment has been added!')
             return redirect('blogs:detail', slug=slug)
+        else:
+            # If form is invalid, still show the form with errors
+            messages.error(request, 'There was an error with your comment. Please check the form and try again.')
     
     context = {
         'post': post,

@@ -65,7 +65,7 @@ class Command(BaseCommand):
         if not User.objects.filter(username='admin').exists():
             admin = User.objects.create_superuser(
                 username='admin',
-                email='admin@codeplatform.com',
+                email='admin@mycodeplatform.com',
                 password='admin123',
                 first_name='Admin',
                 last_name='User'

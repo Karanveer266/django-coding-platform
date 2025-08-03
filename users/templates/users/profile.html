@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ profile_user.username }}'s Profile - CodePlatform{% endblock %}
+{% block title %}{{ profile_user.username }}'s Profile - MyCodePlatform{% endblock %}
 
-{% block meta_description %}View {{ profile_user.username }}'s coding profile, statistics, and achievements on CodePlatform.{% endblock %}
+{% block meta_description %}View {{ profile_user.username }}'s coding profile, statistics, and achievements on MyCodePlatform.{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -93,64 +93,6 @@
         </div>
     </div>
     
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-check text-white"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Problems Solved</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ stats.problems_solved }}</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-code text-white"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Total Submissions</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ stats.total_submissions }}</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-percentage text-white"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Acceptance Rate</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ stats.acceptance_rate }}%</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-fire text-white"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Current Streak</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ profile_user.current_streak }} days</p>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
@@ -262,25 +204,6 @@
         
         <!-- Sidebar -->
         <div class="lg:col-span-1 space-y-6">
-            <!-- Problem Difficulty Breakdown -->
-            {% if stats.difficulty_stats %}
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Problems by Difficulty</h3>
-                    <div class="space-y-3">
-                        {% for difficulty, count in stats.difficulty_stats.items %}
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                                        {% if difficulty == 'easy' %}difficulty-easy{% elif difficulty == 'medium' %}difficulty-medium{% else %}difficulty-hard{% endif %}">
-                                        {{ difficulty|title }}
-                                    </span>
-                                </div>
-                                <span class="text-sm font-medium text-gray-900">{{ count }}</span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
             
             <!-- Preferences -->
             <div class="bg-white rounded-lg shadow-sm p-6">
@@ -310,9 +233,6 @@
                         <a href="{% url 'blogs:create' %}" class="btn-secondary block text-center">
                             <i class="fas fa-pen mr-2"></i>Write Blog Post
                         </a>
-                        <a href="{% url 'blogs:my_posts' %}" class="btn-secondary block text-center">
-                            <i class="fas fa-list mr-2"></i>My Posts
-                        </a>
                     {% else %}
                         <button onclick="followUser()" class="btn-primary block text-center w-full">
                             <i class="fas fa-user-plus mr-2"></i>Follow User
@@ -331,11 +251,11 @@
 {% block extra_js %}
 <script>
 function followUser() {
-    CodePlatform.showToast('Follow functionality coming soon!', 'info');
+    MyCodePlatform.showToast('Follow functionality coming soon!', 'info');
 }
 
 function sendMessage() {
-    CodePlatform.showToast('Messaging functionality coming soon!', 'info');
+    MyCodePlatform.showToast('Messaging functionality coming soon!', 'info');
 }
 </script>
 {% endblock %}

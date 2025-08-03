@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeMirror Test</title>
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .editor-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CodeMirror Test</h1>
+    
+    <div class="editor-container">
+        <textarea id="codeEditor" rows="10" cols="80">function test() {
+    console.log("Hello, world!");
+}</textarea>
+    </div>
+
+    <!-- CodeMirror Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded');
+            
+            const codeEditorElement = document.getElementById('codeEditor');
+            console.log('codeEditor element:', codeEditorElement);
+            
+            if (codeEditorElement) {
+                try {
+                    console.log('Attempting to initialize CodeMirror');
+                    const editor = CodeMirror.fromTextArea(codeEditorElement, {
+                        lineNumbers: true,
+                        mode: 'javascript',
+                        theme: 'dracula'
+                    });
+                    console.log('CodeMirror initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing CodeMirror:', error);
+                }
+            } else {
+                console.error('codeEditor element not found');
+            }
+        });
+    </script>
+</body>
+</html>

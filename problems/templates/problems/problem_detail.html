@@ -1,13 +1,71 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ problem.title }} - CodePlatform{% endblock %}
+{% block title %}{{ problem.title }} - MyCodePlatform{% endblock %}
 
-{% block meta_description %}Solve {{ problem.title }} - {{ problem.get_difficulty_display }} level {{ problem.get_problem_type_display }} problem on CodePlatform.{% endblock %}
+{% block meta_description %}Solve {{ problem.title }} - {{ problem.get_difficulty_display }} level {{ problem.get_problem_type_display }} problem on MyCodePlatform.{% endblock %}
 
 {% block extra_css %}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/blackboard.min.css" rel="stylesheet">
+<style>
+    /* Expandable editor styles */
+    .CodeMirror {
+        height: 400px;
+        transition: height 0.3s ease-in-out;
+    }
+    
+    .CodeMirror.expanded {
+        height: 80vh;
+        max-height: 800px;
+    }
+    
+    .editor-container {
+        position: relative;
+    }
+    
+    .editor-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+    }
+    
+    .editor-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 1200px;
+        height: 80vh;
+        background-color: white;
+        z-index: 50;
+        border-radius: 0.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        padding: 1rem;
+    }
+    
+    .editor-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .editor-modal-content {
+        height: calc(100% - 3rem);
+    }
+    
+    .editor-modal .CodeMirror {
+        height: 100%;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -138,19 +196,22 @@
                         </select>
                     </div>
                     
-                    <div class="mb-4">
+                    <div class="mb-4 relative">
                         <textarea id="codeEditor" rows="20" class="w-full font-mono text-sm border rounded-md p-3" placeholder="Write your solution here..."></textarea>
+                        <button id="expandEditorBtn" class="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium z-10" title="Expand editor (Ctrl+E)">
+                            <i class="fas fa-expand-arrows-alt mr-1"></i>Expand
+                        </button>
                     </div>
                     
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <button id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium">
+                            <button id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium" title="Submit code (Ctrl+Enter)">
                                 <i class="fas fa-play mr-2"></i>Submit
                             </button>
                             <button id="testBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium">
                                 <i class="fas fa-vial mr-2"></i>Test
                             </button>
-                            <button id="aiReviewBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md font-medium">
+                            <button id="aiReviewBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium">
                                 <i class="fas fa-robot mr-2"></i>AI Review
                             </button>
                             <button id="clearBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-medium">
@@ -158,7 +219,7 @@
                             </button>
                         </div>
                         
-                        <a href="{% url 'learning_sessions:start_session' problem.id %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium text-sm">
+                        <a href="{% url 'learning_sessions:start_session' problem.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium text-sm">
                             <i class="fas fa-graduation-cap mr-2"></i>Learning Session
                         </a>
                     </div>
@@ -173,7 +234,7 @@
                             <!-- Modal Header -->
                             <div class="flex items-center justify-between p-6 border-b">
                                 <div class="flex items-center">
-                                    <i class="fas fa-robot text-purple-600 text-xl mr-3"></i>
+                                    <i class="fas fa-robot text-blue-600 text-xl mr-3"></i>
                                     <h3 class="text-lg font-semibold text-gray-900">AI Code Review</h3>
                                 </div>
                                 <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
@@ -201,7 +262,7 @@
                                 </div>
                                 
                                 <div id="reviewLoading" class="hidden text-center py-8">
-                                    <i class="fas fa-spinner fa-spin text-purple-600 text-2xl mb-4"></i>
+                                    <i class="fas fa-spinner fa-spin text-blue-600 text-2xl mb-4"></i>
                                     <p class="text-gray-600">AI is reviewing your code... This may take a few seconds.</p>
                                 </div>
                             </div>
@@ -211,7 +272,7 @@
                                 <button id="cancelReviewBtn" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                                     Cancel
                                 </button>
-                                <button id="startReviewBtn" class="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+                                <button id="startReviewBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                                     <i class="fas fa-robot mr-2"></i>Start Review
                                 </button>
                             </div>
@@ -281,275 +342,568 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
 
 <script>
-        // Initialize CodeMirror
-        const editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
-            lineNumbers: true,
-            mode: 'python',
-            theme: 'dracula',
-            indentUnit: 4,
-            lineWrapping: true
-        });
-
-        // Language templates
-        const templates = {
-            python: `def solution():
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+    
+    // Check if we're on a problem detail page by looking for the codeEditor element
+    const codeEditorElement = document.getElementById('codeEditor');
+    if (!codeEditorElement) {
+        console.log('Code editor element not found, skipping editor initialization');
+        return;
+    }
+    console.log('codeEditor element found:', codeEditorElement);
+    
+    // Language templates
+    const templates = {
+        python: `def solution():
     # Write your solution here
     pass
 
 solution()`,
-            java: `public class Solution {
+        java: `public class Solution {
     public static void main(String[] args) {
         // Write your solution here
     }
 }`,
-            cpp: `#include <iostream>
+        cpp: `#include <iostream>
 using namespace std;
 
 int main() {
     // Write your solution here
     return 0;
 }`,
-            c: `#include <stdio.h>
+        c: `#include <stdio.h>
 
 int main() {
     // Write your solution here
     return 0;
 }`,
-            javascript: `function solution() {
+        javascript: `function solution() {
     // Write your solution here
 }
 
 solution();`
-        };
-
-        // Language change handler
-        document.getElementById('languageSelect').addEventListener('change', function() {
-            const language = this.value;
-            let mode = language;
-            
-            if (language === 'cpp' || language === 'c' || language === 'java') {
-                mode = 'text/x-c++src';
-            } else if (language === 'javascript') {
-                mode = 'javascript';
+    };
+    
+    // Helper function to get the language mode
+    function getLanguageMode(language) {
+        if (language === 'cpp' || language === 'c' || language === 'java') {
+            return 'text/x-c++src';
+        } else if (language === 'javascript') {
+            return 'javascript';
+        }
+        return language;
+    }
+    
+    // Create editor modal elements
+    const editorOverlay = document.createElement('div');
+    editorOverlay.className = 'editor-overlay';
+    document.body.appendChild(editorOverlay);
+    
+    const editorModal = document.createElement('div');
+    editorModal.className = 'editor-modal';
+    editorModal.innerHTML = `
+        <div class="editor-modal-header">
+            <h3 class="text-lg font-semibold text-gray-900">Code Editor</h3>
+            <button id="closeEditorModalBtn" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="editor-modal-content">
+            <div id="modalEditor"></div>
+        </div>
+    `;
+    document.body.appendChild(editorModal);
+    
+    // Initialize CodeMirror
+    let editor;
+    let modalEditorInstance = null;
+    
+    try {
+        console.log('Attempting to initialize CodeMirror');
+        
+        // Initialize CodeMirror from textarea
+        editor = CodeMirror.fromTextArea(codeEditorElement, {
+            lineNumbers: true,
+            mode: 'python',
+            theme: 'blackboard',
+            indentUnit: 4,
+            lineWrapping: true,
+            extraKeys: {
+                'Ctrl-Enter': function() {
+                    document.getElementById('submitBtn').click();
+                },
+                'Ctrl-E': function() {
+                    document.getElementById('expandEditorBtn').click();
+                }
             }
-            
-            editor.setOption('mode', mode);
-            editor.setValue(templates[language] || '');
         });
+        
+        // Set initial content with Python template
+        const initialLanguage = document.getElementById('languageSelect').value || 'python';
+        editor.setValue(templates[initialLanguage] || templates.python);
+        editor.setOption('mode', getLanguageMode(initialLanguage));
+        
+        console.log('CodeMirror initialized successfully');
+        
+    } catch (error) {
+        console.error('Error initializing CodeMirror:', error);
+        return;
+    }
+    
+    // Language change handler
+    document.getElementById('languageSelect').addEventListener('change', function() {
+        const language = this.value;
+        const mode = getLanguageMode(language);
+        
+        // Update main editor
+        editor.setOption('mode', mode);
+        
+        // Set the appropriate template based on language
+        if (templates[language]) {
+            editor.setValue(templates[language]);
+        }
+        
+        // Update modal editor if it exists
+        if (modalEditorInstance) {
+            modalEditorInstance.setOption('mode', mode);
+            if (templates[language]) {
+                modalEditorInstance.setValue(templates[language]);
+            }
+        }
+    });
+    
+    // Function to sync editor content with textarea
+    function syncEditorWithTextarea() {
+        if (editor && codeEditorElement) {
+            codeEditorElement.value = editor.getValue();
+        }
+    }
 
-        // Submit button handler
-        document.getElementById('submitBtn').addEventListener('click', async function() {
-            const code = editor.getValue().trim();
-            const language = document.getElementById('languageSelect').value;
-            const resultArea = document.getElementById('resultArea');
+    // Submit button handler
+    document.getElementById('submitBtn').addEventListener('click', async function() {
+        // Sync editor content with textarea
+        syncEditorWithTextarea();
+        
+        // Get code from the active editor (modal or main)
+        let code;
+        if (editorModal.style.display === 'block' && modalEditorInstance) {
+            code = modalEditorInstance.getValue().trim();
+        } else {
+            code = editor.getValue().trim();
+        }
+        
+        const language = document.getElementById('languageSelect').value;
+        const resultArea = document.getElementById('resultArea');
+        
+        if (!code) {
+            resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+            resultArea.innerHTML = '<p class="text-red-800">Please write some code before submitting.</p>';
+            resultArea.classList.remove('hidden');
+            return;
+        }
+        
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+        
+        try {
+            const response = await fetch('{% url "submit:submit_solution" problem.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    code: code,
+                    language: language
+                })
+            });
             
-            if (!code) {
+            const data = await response.json();
+            
+            if (!data.error) {
+                let statusColor = 'green';
+                let statusIcon = 'check';
+                
+                if (data.status === 'WRONG_ANSWER') {
+                    statusColor = 'red';
+                    statusIcon = 'times';
+                } else if (data.status === 'TIME_LIMIT_EXCEEDED') {
+                    statusColor = 'yellow';
+                    statusIcon = 'clock';
+                } else if (data.status === 'RUNTIME_ERROR' || data.status === 'COMPILATION_ERROR') {
+                    statusColor = 'orange';
+                    statusIcon = 'exclamation-triangle';
+                }
+                
+                resultArea.className = `mt-4 p-4 rounded-md bg-${statusColor}-100 border border-${statusColor}-200`;
+                resultArea.innerHTML = `
+                    <div class="text-${statusColor}-800">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-${statusIcon} mr-2"></i>
+                            <span class="font-semibold">${data.message}</span>
+                        </div>
+                        <div class="text-sm">
+                            <p>Test Cases: ${data.passed_tests}/${data.total_tests} passed</p>
+                            <p>Score: ${data.score.toFixed(1)}%</p>
+                            ${data.max_time ? `<p>Execution Time: ${data.max_time.toFixed(3)}s</p>` : ''}
+                        </div>
+                        <div class="mt-3">
+                            <a href="${data.redirect_url}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                <i class="fas fa-eye mr-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else {
                 resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
-                resultArea.innerHTML = '<p class="text-red-800">Please write some code before submitting.</p>';
-                resultArea.classList.remove('hidden');
-                return;
+                resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>' + (data.error || 'Submission failed') + '</p>';
             }
             
-            this.disabled = true;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+            resultArea.classList.remove('hidden');
             
-            try {
-                const response = await fetch('{% url "submit:submit_solution" problem.id %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({
-                        code: code,
-                        language: language
-                    })
-                });
+        } catch (error) {
+            resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+            resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>Network error. Please try again.</p>';
+            resultArea.classList.remove('hidden');
+        }
+        
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-play mr-2"></i>Submit';
+    });
+
+    // Test button handler
+    document.getElementById('testBtn').addEventListener('click', async function() {
+        // Sync editor content with textarea
+        syncEditorWithTextarea();
+        
+        // Get code from the active editor (modal or main)
+        let code;
+        if (editorModal.style.display === 'block' && modalEditorInstance) {
+            code = modalEditorInstance.getValue().trim();
+        } else {
+            code = editor.getValue().trim();
+        }
+        
+        const language = document.getElementById('languageSelect').value;
+        const resultArea = document.getElementById('resultArea');
+        
+        if (!code) {
+            resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+            resultArea.innerHTML = '<p class="text-red-800">Please write some code before testing.</p>';
+            resultArea.classList.remove('hidden');
+            return;
+        }
+        
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Testing...';
+        
+        try {
+            const response = await fetch('{% url "submit:test_code" problem.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    code: code,
+                    language: language
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!data.error && data.test_results) {
+                resultArea.className = 'mt-4 p-4 rounded-md bg-blue-100 border border-blue-200';
+                let resultsHtml = `
+                    <div class="text-blue-800">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-vial mr-2"></i>
+                            <span class="font-semibold">Test Results</span>
+                        </div>
+                        <div class="space-y-4">
+                `;
                 
-                const data = await response.json();
-                
-                if (!data.error) {
-                    let statusColor = 'green';
-                    let statusIcon = 'check';
+                // Add sample test case results
+                data.test_results.forEach((result, index) => {
+                    const statusColor = result.status === 'ACCEPTED' ? 'green' : 'red';
+                    const statusIcon = result.status === 'ACCEPTED' ? 'check' : 'times';
                     
-                    if (data.status === 'WRONG_ANSWER') {
-                        statusColor = 'red';
-                        statusIcon = 'times';
-                    } else if (data.status === 'TIME_LIMIT_EXCEEDED') {
-                        statusColor = 'yellow';
-                        statusIcon = 'clock';
-                    } else if (data.status === 'RUNTIME_ERROR' || data.status === 'COMPILATION_ERROR') {
-                        statusColor = 'orange';
-                        statusIcon = 'exclamation-triangle';
-                    }
-                    
-                    resultArea.className = `mt-4 p-4 rounded-md bg-${statusColor}-100 border border-${statusColor}-200`;
-                    resultArea.innerHTML = `
-                        <div class="text-${statusColor}-800">
-                            <div class="flex items-center mb-2">
+                    resultsHtml += `
+                        <div class="border rounded-md overflow-hidden">
+                            <div class="bg-${statusColor}-100 text-${statusColor}-800 px-4 py-2 font-medium flex items-center">
                                 <i class="fas fa-${statusIcon} mr-2"></i>
-                                <span class="font-semibold">${data.message}</span>
+                                Sample Test Case ${index + 1}: ${result.status === 'ACCEPTED' ? 'Passed' : 'Failed'}
                             </div>
-                            <div class="text-sm">
-                                <p>Test Cases: ${data.passed_tests}/${data.total_tests} passed</p>
-                                <p>Score: ${data.score.toFixed(1)}%</p>
-                                ${data.max_time ? `<p>Execution Time: ${data.max_time.toFixed(3)}s</p>` : ''}
-                            </div>
-                            <div class="mt-3">
-                                <a href="${data.redirect_url}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                                    <i class="fas fa-eye mr-1"></i>View Details
-                                </a>
+                            <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-700 mb-1">Input</div>
+                                    <pre class="bg-gray-100 p-2 rounded text-sm overflow-x-auto">${result.input_data || ''}</pre>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-700 mb-1">Expected Output</div>
+                                    <pre class="bg-gray-100 p-2 rounded text-sm overflow-x-auto">${result.expected_output || ''}</pre>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <div class="text-sm font-medium text-gray-700 mb-1">Your Output</div>
+                                    <pre class="bg-gray-100 p-2 rounded text-sm overflow-x-auto">${result.actual_output || ''}</pre>
+                                </div>
+                                ${result.error ? `
+                                <div class="md:col-span-2">
+                                    <div class="text-sm font-medium text-red-700 mb-1">Error</div>
+                                    <pre class="bg-red-50 p-2 rounded text-sm overflow-x-auto text-red-800">${result.error}</pre>
+                                </div>
+                                ` : ''}
                             </div>
                         </div>
                     `;
-                    
-                    // Show success message
-                    CodePlatform.showToast('Submission processed successfully!', 'success');
-                } else {
-                    resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
-                    resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>' + (data.error || 'Submission failed') + '</p>';
-                }
-                
-                resultArea.classList.remove('hidden');
-                
-            } catch (error) {
-                resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
-                resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>Network error. Please try again.</p>';
-                resultArea.classList.remove('hidden');
-            }
-            
-            this.disabled = false;
-            this.innerHTML = '<i class="fas fa-play mr-2"></i>Submit';
-        });
-
-        // Test button handler
-        document.getElementById('testBtn').addEventListener('click', function() {
-            const resultArea = document.getElementById('resultArea');
-            resultArea.className = 'mt-4 p-4 rounded-md bg-blue-100 border border-blue-200';
-            resultArea.innerHTML = '<p class="text-blue-800"><i class="fas fa-info-circle mr-2"></i>Test functionality coming soon!</p>';
-            resultArea.classList.remove('hidden');
-        });
-
-        // Clear button handler
-        document.getElementById('clearBtn').addEventListener('click', function() {
-            if (confirm('Are you sure you want to clear the code?')) {
-                const language = document.getElementById('languageSelect').value;
-                editor.setValue(templates[language] || '');
-                document.getElementById('resultArea').classList.add('hidden');
-            }
-        });
-
-        // Initialize with Python template
-        editor.setValue(templates.python);
-
-        // AI Code Review functionality
-        const aiReviewModal = document.getElementById('aiReviewModal');
-        const aiReviewBtn = document.getElementById('aiReviewBtn');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const cancelReviewBtn = document.getElementById('cancelReviewBtn');
-        const startReviewBtn = document.getElementById('startReviewBtn');
-        const reviewQuestion = document.getElementById('reviewQuestion');
-        const reviewResult = document.getElementById('reviewResult');
-        const reviewContent = document.getElementById('reviewContent');
-        const reviewLoading = document.getElementById('reviewLoading');
-
-        // Open AI Review Modal
-        aiReviewBtn.addEventListener('click', function() {
-            const code = editor.getValue().trim();
-            
-            if (!code) {
-                const resultArea = document.getElementById('resultArea');
-                resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
-                resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>Please write some code before requesting a review.</p>';
-                resultArea.classList.remove('hidden');
-                return;
-            }
-            
-            // Reset modal state
-            reviewResult.classList.add('hidden');
-            reviewLoading.classList.add('hidden');
-            reviewQuestion.value = '';
-            startReviewBtn.disabled = false;
-            startReviewBtn.innerHTML = '<i class="fas fa-robot mr-2"></i>Start Review';
-            
-            // Show modal
-            aiReviewModal.classList.remove('hidden');
-        });
-
-        // Close Modal
-        function closeModal() {
-            aiReviewModal.classList.add('hidden');
-        }
-
-        closeModalBtn.addEventListener('click', closeModal);
-        cancelReviewBtn.addEventListener('click', closeModal);
-
-        // Close modal when clicking outside
-        aiReviewModal.addEventListener('click', function(e) {
-            if (e.target === aiReviewModal) {
-                closeModal();
-            }
-        });
-
-        // Start AI Review
-        startReviewBtn.addEventListener('click', async function() {
-            const code = editor.getValue().trim();
-            const language = document.getElementById('languageSelect').value;
-            const question = reviewQuestion.value.trim();
-            
-            // Show loading
-            reviewResult.classList.add('hidden');
-            reviewLoading.classList.remove('hidden');
-            startReviewBtn.disabled = true;
-            startReviewBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Reviewing...';
-            
-            try {
-                const response = await fetch('/ai-code-review/review/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({
-                        code: code,
-                        language: language,
-                        question: question
-                    })
                 });
                 
-                const data = await response.json();
+                resultsHtml += `
+                        </div>
+                    </div>
+                `;
                 
-                // Hide loading
-                reviewLoading.classList.add('hidden');
-                
-                if (data.success) {
-                    // Show review results
-                    reviewContent.textContent = data.review;
-                    reviewResult.classList.remove('hidden');
-                    
-                    // Update button to show completion
-                    startReviewBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Review Complete';
-                    
-                } else {
-                    // Show error
-                    reviewContent.textContent = data.error || 'Failed to get AI review. Please try again.';
-                    reviewContent.className = 'bg-red-50 p-4 rounded-lg border border-red-200 text-sm text-red-800 whitespace-pre-wrap';
-                    reviewResult.classList.remove('hidden');
-                    
-                    startReviewBtn.disabled = false;
-                    startReviewBtn.innerHTML = '<i class="fas fa-robot mr-2"></i>Try Again';
+                resultArea.innerHTML = resultsHtml;
+            } else {
+                resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+                resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>' + (data.error || 'Test failed') + '</p>';
+            }
+            
+            resultArea.classList.remove('hidden');
+            
+        } catch (error) {
+            resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+            resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>Network error. Please try again.</p>';
+            resultArea.classList.remove('hidden');
+        }
+        
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-vial mr-2"></i>Test';
+    });
+
+    // Clear button handler
+    document.getElementById('clearBtn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear the code?')) {
+            const language = document.getElementById('languageSelect').value;
+            
+            // Clear main editor
+            editor.setValue(templates[language] || '');
+            
+            // Clear modal editor if it exists
+            if (modalEditorInstance) {
+                modalEditorInstance.setValue(templates[language] || '');
+            }
+            
+            document.getElementById('resultArea').classList.add('hidden');
+        }
+    });
+    
+    // Expand editor button handler
+    document.getElementById('expandEditorBtn').addEventListener('click', function() {
+        // Show the overlay and modal
+        editorOverlay.style.display = 'block';
+        editorModal.style.display = 'block';
+        
+        // Get the current code and language
+        const code = editor.getValue();
+        const language = document.getElementById('languageSelect').value;
+        
+        // Initialize modal editor if it doesn't exist
+        if (!modalEditorInstance) {
+            const modalEditorDiv = document.getElementById('modalEditor');
+            modalEditorInstance = CodeMirror(modalEditorDiv, {
+                lineNumbers: true,
+                mode: getLanguageMode(language),
+                theme: 'blackboard',
+                indentUnit: 4,
+                lineWrapping: true,
+                value: code,
+                extraKeys: {
+                    'Ctrl-Enter': function() {
+                        document.getElementById('submitBtn').click();
+                    },
+                    'Esc': function() {
+                        document.getElementById('closeEditorModalBtn').click();
+                    }
                 }
+            });
+        } else {
+            // Update the modal editor content and mode
+            modalEditorInstance.setValue(code);
+            modalEditorInstance.setOption('mode', getLanguageMode(language));
+        }
+        
+        // Refresh the editor to ensure proper rendering
+        setTimeout(() => {
+            modalEditorInstance.refresh();
+            modalEditorInstance.focus();
+        }, 10);
+    });
+    
+    // Close modal button handler
+    document.getElementById('closeEditorModalBtn').addEventListener('click', function() {
+        // Hide the overlay and modal
+        editorOverlay.style.display = 'none';
+        editorModal.style.display = 'none';
+        
+        // Update the main editor with the modal editor content
+        if (modalEditorInstance) {
+            const code = modalEditorInstance.getValue();
+            editor.setValue(code);
+        }
+    });
+    
+    // Also close the modal when clicking on the overlay
+    editorOverlay.addEventListener('click', function() {
+        document.getElementById('closeEditorModalBtn').click();
+    });
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Escape key to close the modal
+        if (e.key === 'Escape' && editorModal.style.display === 'block') {
+            document.getElementById('closeEditorModalBtn').click();
+        }
+        
+        // Ctrl+Enter to submit code
+        if (e.ctrlKey && e.key === 'Enter') {
+            document.getElementById('submitBtn').click();
+        }
+    });
+
+    // AI Code Review functionality
+    const aiReviewModal = document.getElementById('aiReviewModal');
+    const aiReviewBtn = document.getElementById('aiReviewBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelReviewBtn = document.getElementById('cancelReviewBtn');
+    const startReviewBtn = document.getElementById('startReviewBtn');
+    const reviewQuestion = document.getElementById('reviewQuestion');
+    const reviewResult = document.getElementById('reviewResult');
+    const reviewContent = document.getElementById('reviewContent');
+    const reviewLoading = document.getElementById('reviewLoading');
+
+    // Open AI Review Modal
+    aiReviewBtn.addEventListener('click', function() {
+        // Sync editor content with textarea
+        syncEditorWithTextarea();
+        
+        // Get code from the active editor (modal or main)
+        let code;
+        if (editorModal.style.display === 'block' && modalEditorInstance) {
+            code = modalEditorInstance.getValue().trim();
+        } else {
+            code = editor.getValue().trim();
+        }
+        
+        if (!code) {
+            const resultArea = document.getElementById('resultArea');
+            resultArea.className = 'mt-4 p-4 rounded-md bg-red-100 border border-red-200';
+            resultArea.innerHTML = '<p class="text-red-800"><i class="fas fa-times mr-2"></i>Please write some code before requesting a review.</p>';
+            resultArea.classList.remove('hidden');
+            return;
+        }
+        
+        // Reset modal state
+        reviewResult.classList.add('hidden');
+        reviewLoading.classList.add('hidden');
+        reviewQuestion.value = '';
+        startReviewBtn.disabled = false;
+        startReviewBtn.innerHTML = '<i class="fas fa-robot mr-2"></i>Start Review';
+        
+        // Show modal
+        aiReviewModal.classList.remove('hidden');
+    });
+
+    // Close Modal
+    function closeAiModal() {
+        aiReviewModal.classList.add('hidden');
+    }
+
+    closeModalBtn.addEventListener('click', closeAiModal);
+    cancelReviewBtn.addEventListener('click', closeAiModal);
+
+    // Close modal when clicking outside
+    aiReviewModal.addEventListener('click', function(e) {
+        if (e.target === aiReviewModal) {
+            closeAiModal();
+        }
+    });
+
+    // Start AI Review
+    startReviewBtn.addEventListener('click', async function() {
+        // Sync editor content with textarea
+        syncEditorWithTextarea();
+        
+        // Get code from the active editor (modal or main)
+        let code;
+        if (editorModal.style.display === 'block' && modalEditorInstance) {
+            code = modalEditorInstance.getValue().trim();
+        } else {
+            code = editor.getValue().trim();
+        }
+        const language = document.getElementById('languageSelect').value;
+        const question = reviewQuestion.value.trim();
+        
+        // Show loading
+        reviewResult.classList.add('hidden');
+        reviewLoading.classList.remove('hidden');
+        startReviewBtn.disabled = true;
+        startReviewBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Reviewing...';
+        
+        try {
+            const response = await fetch('/ai-code-review/review/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    code: code,
+                    language: language,
+                    question: question
+                })
+            });
+            
+            const data = await response.json();
+            
+            // Hide loading
+            reviewLoading.classList.add('hidden');
+            
+            if (data.success) {
+                // Show review results
+                reviewContent.textContent = data.review;
+                reviewContent.className = 'bg-gray-50 p-4 rounded-lg border text-sm whitespace-pre-wrap';
+                reviewResult.classList.remove('hidden');
                 
-            } catch (error) {
-                // Hide loading and show error
-                reviewLoading.classList.add('hidden');
-                reviewContent.textContent = 'Network error. Please check your connection and try again.';
+                // Update button to show completion
+                startReviewBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Review Complete';
+                // Keep the button disabled to prevent multiple submissions
+                
+            } else {
+                // Show error
+                reviewContent.textContent = data.error || 'Failed to get AI review. Please try again.';
                 reviewContent.className = 'bg-red-50 p-4 rounded-lg border border-red-200 text-sm text-red-800 whitespace-pre-wrap';
                 reviewResult.classList.remove('hidden');
                 
+                // Re-enable the button for retry
                 startReviewBtn.disabled = false;
                 startReviewBtn.innerHTML = '<i class="fas fa-robot mr-2"></i>Try Again';
             }
-        });
+            
+        } catch (error) {
+            // Hide loading and show error
+            reviewLoading.classList.add('hidden');
+            reviewContent.textContent = 'Network error. Please check your connection and try again.';
+            reviewContent.className = 'bg-red-50 p-4 rounded-lg border border-red-200 text-sm text-red-800 whitespace-pre-wrap';
+            reviewResult.classList.remove('hidden');
+            
+            // Re-enable the button for retry
+            startReviewBtn.disabled = false;
+            startReviewBtn.innerHTML = '<i class="fas fa-robot mr-2"></i>Try Again';
+            console.error('AI Review error:', error);
+        }
+    });
+});
 </script>
 {% endblock %}

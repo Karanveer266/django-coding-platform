@@ -1,8 +1,8 @@
 /**
- * CodePlatform Main JavaScript
+ * MyCodePlatform Main JavaScript
  */
 
-const CodePlatform = {
+const MyCodePlatform = {
     // Toast notification system
     showToast: function(message, type = 'info') {
         // Remove any existing toasts
@@ -90,5 +90,5 @@ const CodePlatform = {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    CodePlatform.init();
+    MyCodePlatform.init();
 });
